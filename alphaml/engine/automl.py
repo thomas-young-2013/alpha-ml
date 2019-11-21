@@ -2,7 +2,7 @@ import logging
 from alphaml.engine.components.components_manager import ComponentsManager
 from alphaml.engine.components.data_manager import DataManager
 from alphaml.engine.evaluator.base import BaseClassificationEvaluator, BaseRegressionEvaluator
-from alphaml.engine.evaluator.hyperopt_evaluator import HyperoptClassificationEvaluator
+from alphaml.engine.evaluator.hyperopt_evaluator import HyperoptClassificationEvaluator, HyperoptRegressionEvaluator
 from alphaml.engine.optimizer.smac_smbo import SMAC_SMBO
 from alphaml.engine.optimizer.monotone_mab_optimizer import MONO_MAB_SMBO
 from alphaml.engine.optimizer.monotone_mab_tpe_optimizer import MONO_MAB_TPE_SMBO
@@ -74,7 +74,6 @@ class AutoML(object):
             self.optimizer = MONO_MAB_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
             self.optimizer.run()
         elif self.optimizer_type == 'tpe':
-            self.evaluator = HyperoptClassificationEvaluator()
             config_space = self.component_manager.get_hyperparameter_search_space(task_type,
                                                                                   include=self.include_models,
                                                                                   exclude=self.exclude_models,
@@ -82,8 +81,6 @@ class AutoML(object):
             self.optimizer = TPE_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
             self.optimizer.run()
         elif self.optimizer_type == 'mono_tpe_smbo':
-            # Create optimizer.
-            self.evaluator = HyperoptClassificationEvaluator()
             config_space = self.component_manager.get_hyperparameter_search_space(task_type,
                                                                                   include=self.include_models,
                                                                                   exclude=self.exclude_models,
@@ -159,7 +156,10 @@ class AutoMLClassifier(AutoML):
                  seed=None):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
                          exclude_models, optimizer_type, seed)
-        self.evaluator = BaseClassificationEvaluator()
+        if optimizer_type == 'smbo':
+            self.evaluator = BaseClassificationEvaluator()
+        elif optimizer_type == 'tpe':
+            self.evaluator = HyperoptClassificationEvaluator()
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)
@@ -178,7 +178,10 @@ class AutoMLRegressor(AutoML):
                  seed=None):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
                          exclude_models, optimizer_type, seed)
-        self.evaluator = BaseRegressionEvaluator()
+        if optimizer_type == 'smbo':
+            self.evaluator = BaseRegressionEvaluator()
+        elif optimizer_type == 'tpe':
+            self.evaluator = HyperoptRegressionEvaluator()
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)

@@ -5,16 +5,13 @@ import time
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UniformIntegerHyperparameter
-from ConfigSpace.conditions import EqualsCondition, InCondition
+from ConfigSpace.conditions import EqualsCondition
 
-from alphaml.engine.components.models.base_model import BaseClassificationModel, IterativeComponentWithSampleWeight
+from alphaml.engine.components.models.base_model import BaseRegressionModel, IterativeComponentWithSampleWeight
 from alphaml.utils.constants import *
 
 
-class MLP(
-    IterativeComponentWithSampleWeight,
-    BaseClassificationModel,
-):
+class MLP(IterativeComponentWithSampleWeight, BaseRegressionModel):
     def __init__(self, activation, solver, alpha, tol, hidden_size, learning_rate='constant', learning_rate_init=0.001,
                  power_t=0.5, momentum=0.9, nesterovs_momentum=True,
                  beta1=0.9, random_state=None):
@@ -36,7 +33,7 @@ class MLP(
         self.start_time = time.time()
 
     def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
-        from sklearn.neural_network import MLPClassifier
+        from sklearn.neural_network import MLPRegressor
 
         # Need to fit at least two iterations, otherwise early stopping will not
         # work because we cannot determine whether the algorithm actually
@@ -70,21 +67,21 @@ class MLP(
                 else 0.5
             self.tol = float(self.tol)
 
-            self.estimator = MLPClassifier(hidden_layer_sizes=(self.hidden_size, self.hidden_size),
-                                           activation=self.activation,
-                                           solver=self.solver,
-                                           alpha=self.alpha,
-                                           learning_rate=self.learning_rate,
-                                           learning_rate_init=self.learning_rate_init,
-                                           power_t=self.power_t,
-                                           max_iter=n_iter,
-                                           shuffle=True,
-                                           tol=self.tol,
-                                           warm_start=True,
-                                           momentum=self.momentum,
-                                           n_iter_no_change=50,
-                                           nesterovs_momentum=self.nesterovs_momentum,
-                                           beta_1=self.beta1)
+            self.estimator = MLPRegressor(hidden_layer_sizes=(self.hidden_size, self.hidden_size),
+                                          activation=self.activation,
+                                          solver=self.solver,
+                                          alpha=self.alpha,
+                                          learning_rate=self.learning_rate,
+                                          learning_rate_init=self.learning_rate_init,
+                                          power_t=self.power_t,
+                                          max_iter=n_iter,
+                                          shuffle=True,
+                                          tol=self.tol,
+                                          warm_start=True,
+                                          momentum=self.momentum,
+                                          n_iter_no_change=50,
+                                          nesterovs_momentum=self.nesterovs_momentum,
+                                          beta_1=self.beta1)
             self.estimator.fit(X, y)
         else:
             self.estimator.max_iter += n_iter
@@ -120,11 +117,11 @@ class MLP(
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'MLP Classifier',
-                'name': 'Multi-layer Perceptron Classifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
+        return {'shortname': 'MLP Regressor',
+                'name': 'Multi-layer Perceptron Regressor',
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
@@ -179,13 +176,12 @@ class MLP(
             space = {'hidden_size': hp.randint("mlp_hidden_size", 450) + 50,
                      'activation': hp.choice('mlp_activation', ["identity", "logistic", "tanh", "relu"]),
                      'solver': hp.choice('mlp_solver',
-                                         [("sgd", {'learning_rate': hp.choice('mlp_learning_rate', [("adaptive", {}),
-                                                                                                    ("constant", {}),
-                                                                                                    ("invscaling", {
-                                                                                                        'power_t': hp.uniform(
-                                                                                                            'mlp_power_t',
-                                                                                                            1e-5,
-                                                                                                            1)})]),
+                                         [("sgd", {'learning_rate': hp.choice('mlp_learning_rate',
+                                                                              [("adaptive", {}),
+                                                                               ("constant", {}),
+                                                                               ("invscaling", {
+                                                                                   'power_t': hp.uniform('mlp_power_t',
+                                                                                                         1e-5, 1)})]),
                                                    'momentum': hp.uniform('mlp_momentum', 0.6, 1),
                                                    'nesterovs_momentum': hp.choice('mlp_nesterovs_momentum',
                                                                                    [True, False])}),

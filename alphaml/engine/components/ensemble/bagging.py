@@ -1,6 +1,5 @@
 from alphaml.engine.components.ensemble.base_ensemble import *
 from alphaml.engine.components.data_manager import DataManager
-from alphaml.utils.common import get_most
 import numpy as np
 from functools import reduce
 
@@ -32,7 +31,7 @@ class Bagging(BaseEnsembleModel):
             num_outputs = len(pred)
             model_pred_list.append(pred)
 
-        if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+        if self.task_type == CLASSIFICATION:
             # Calculate the average of predictions
             for i in range(num_outputs):
                 sample_pred_list = [model_pred[i] for model_pred in model_pred_list]

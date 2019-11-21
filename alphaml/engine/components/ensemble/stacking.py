@@ -10,7 +10,7 @@ class Stacking(BaseEnsembleModel):
         super().__init__(model_info, ensemble_size, task_type, metric, evaluator, model_type)
         self.kfold = kfold
         # We use Xgboost as default meta-learner
-        if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+        if self.task_type == CLASSIFICATION:
             if meta_learner == 'logistic':
                 from sklearn.linear_model.logistic import LogisticRegression
                 self.meta_learner = LogisticRegression(max_iter=1000)
@@ -31,7 +31,7 @@ class Stacking(BaseEnsembleModel):
 
     def fit(self, dm: DataManager):
         # Split training data for phase 1 and phase 2
-        if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+        if self.task_type == CLASSIFICATION:
             kf = StratifiedKFold(n_splits=self.kfold)
         elif self.task_type == REGRESSION:
             kf = KFold(n_splits=self.kfold)
@@ -45,7 +45,7 @@ class Stacking(BaseEnsembleModel):
                     # The final list will contain self.kfold * self.ensemble_size models
                     self.ensemble_models.append(estimator)
                     pred = self.get_proba_predictions(estimator, x_p2)
-                    if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+                    if self.task_type == CLASSIFICATION:
                         n_dim = np.array(pred).shape[1]
                         if n_dim == 2:
                             # Binary classificaion
@@ -77,7 +77,7 @@ class Stacking(BaseEnsembleModel):
         feature_p2 = None
         for i, model in enumerate(self.ensemble_models):
             pred = self.get_proba_predictions(model, X)
-            if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+            if self.task_type == CLASSIFICATION:
                 n_dim = np.array(pred).shape[1]
                 if n_dim == 2:
                     n_dim = 1

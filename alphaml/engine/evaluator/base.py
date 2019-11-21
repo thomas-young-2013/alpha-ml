@@ -6,6 +6,7 @@ import os
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, StratifiedKFold
+
 from alphaml.engine.components.models.classification import _classifiers
 from alphaml.engine.components.models.regression import _regressors
 from alphaml.utils.save_ease import save_ease
@@ -27,11 +28,7 @@ def update_config(config):
 
 
 class BaseClassificationEvaluator(object):
-    """
-    This Base Evaluator class must have: 1) data_manager and metric_func, 2) __call__ and fit_predict.
-    """
-
-    def __init__(self, val_size=0.7, kfold=None):
+    def __init__(self, val_size=0.33, kfold=None):
         self.val_size = val_size
         self.kfold = kfold
         self.data_manager = None
@@ -49,12 +46,12 @@ class BaseClassificationEvaluator(object):
         start_time = time.time()
         self.logger.info('<START TO FIT> %s' % classifier_type)
         self.logger.info('<CONFIG> %s' % config.get_dictionary())
-        # Split data
         if self.kfold:
             if not isinstance(self.kfold, int) or self.kfold < 2:
                 raise ValueError("Kfold must be an integer larger than 2!")
 
         if not self.kfold:
+            # Split data
             data_X, data_y = self.data_manager.train_X, self.data_manager.train_y
             # TODO: Specify random_state
             train_X, val_X, train_y, val_y = train_test_split(data_X, data_y,
@@ -176,13 +173,8 @@ class BaseClassificationEvaluator(object):
         return y_pred
 
 
-# TODO: Modify DataManager
 class BaseRegressionEvaluator(object):
-    """
-    This Base Evaluator class must have: 1) data_manager and metric_func, 2) __call__ and fit_predict.
-    """
-
-    def __init__(self, val_size=0.7, kfold=None):
+    def __init__(self, val_size=0.33, kfold=None):
         self.val_size = val_size
         self.kfold = kfold
         self.data_manager = None
@@ -200,6 +192,10 @@ class BaseRegressionEvaluator(object):
         start_time = time.time()
         self.logger.info('<START TO FIT> %s' % regressor_type)
         self.logger.info('<CONFIG> %s' % config.get_dictionary())
+        if self.kfold:
+            if not isinstance(self.kfold, int) or self.kfold < 2:
+                raise ValueError("Kfold must be an integer larger than 2!")
+
         if not self.kfold:
             # Split data
             data_X, data_y = self.data_manager.train_X, self.data_manager.train_y

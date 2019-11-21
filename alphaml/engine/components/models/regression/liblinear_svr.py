@@ -64,26 +64,26 @@ class LibLinear_SVR(BaseRegressionModel):
                 'output': (PREDICTIONS,)}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        cs = ConfigurationSpace()
+    def get_hyperparameter_search_space(dataset_properties=None, optimizer='smac'):
+        if optimizer == 'smac':
+            cs = ConfigurationSpace()
 
-        loss = CategoricalHyperparameter(
-            "loss", ["epsilon_insensitive", "squared_epsilon_insensitive"], default_value="epsilon_insensitive")
-        dual = CategoricalHyperparameter("dual", ['True', 'False'], default_value='True')
-        # This is set ad-hoc
-        tol = UniformFloatHyperparameter(
-            "tol", 1e-5, 1e-1, default_value=1e-4, log=True)
-        C = UniformFloatHyperparameter(
-            "C", 0.03125, 32768, log=True, default_value=1.0)
-        # These are set ad-hoc
-        fit_intercept = Constant("fit_intercept", "True")
-        intercept_scaling = Constant("intercept_scaling", 1)
-        cs.add_hyperparameters([loss, dual, tol, C,
-                                fit_intercept, intercept_scaling])
+            loss = CategoricalHyperparameter(
+                "loss", ["epsilon_insensitive", "squared_epsilon_insensitive"], default_value="epsilon_insensitive")
+            dual = CategoricalHyperparameter("dual", ['True', 'False'], default_value='True')
+            # This is set ad-hoc
+            tol = UniformFloatHyperparameter(
+                "tol", 1e-5, 1e-1, default_value=1e-4, log=True)
+            C = UniformFloatHyperparameter(
+                "C", 0.03125, 32768, log=True, default_value=1.0)
+            fit_intercept = Constant("fit_intercept", "True")
+            intercept_scaling = Constant("intercept_scaling", 1)
+            cs.add_hyperparameters([loss, dual, tol, C,
+                                    fit_intercept, intercept_scaling])
 
-        dual_and_loss = ForbiddenAndConjunction(
-            ForbiddenEqualsClause(dual, "False"),
-            ForbiddenEqualsClause(loss, "epsilon_insensitive")
-        )
-        cs.add_forbidden_clause(dual_and_loss)
-        return cs
+            dual_and_loss = ForbiddenAndConjunction(
+                ForbiddenEqualsClause(dual, "False"),
+                ForbiddenEqualsClause(loss, "epsilon_insensitive")
+            )
+            cs.add_forbidden_clause(dual_and_loss)
+            return cs

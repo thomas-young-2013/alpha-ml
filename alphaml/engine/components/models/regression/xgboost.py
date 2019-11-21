@@ -1,5 +1,6 @@
 import xgboost as xgb
 import numpy as np
+from hyperopt import hp
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
@@ -74,21 +75,46 @@ class XGBoostRegressor(BaseRegressionModel):
                 'output': (PREDICTIONS,)}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        cs = ConfigurationSpace()
+    def get_hyperparameter_search_space(dataset_properties=None, optimizer='smac'):
+        if optimizer == 'smac':
+            cs = ConfigurationSpace()
 
-        n_estimators = UniformFloatHyperparameter("n_estimators", 50, 500, default_value=200, q=20)
-        eta = UniformFloatHyperparameter("eta", 0.025, 0.3, default_value=0.3, q=0.025)
-        min_child_weight = UniformIntegerHyperparameter("min_child_weight", 1, 10, default_value=1)
-        max_depth = UniformIntegerHyperparameter("max_depth", 2, 10, default_value=6)
-        subsample = UniformFloatHyperparameter("subsample", 0.5, 1, default_value=1, q=0.05)
-        gamma = UniformFloatHyperparameter("gamma", 0, 1, default_value=0, q=0.1)
-        colsample_bytree = UniformFloatHyperparameter("colsample_bytree", 0.5, 1, default_value=1., q=0.05)
-        alpha = UniformFloatHyperparameter("alpha", 1e-10, 10, log=True,default_value=1e-10)
-        lambda_t = UniformFloatHyperparameter("lambda_t", 1e-10, 10,log=True, default_value=1e-10)
-        scale_pos_weight = CategoricalHyperparameter("scale_pos_weight", [0.01, 0.1, 1., 10, 100], default_value=1.)
+            n_estimators = UniformFloatHyperparameter("n_estimators", 50, 500, default_value=200, q=20)
+            eta = UniformFloatHyperparameter("eta", 0.025, 0.3, default_value=0.3, q=0.025)
+            min_child_weight = UniformIntegerHyperparameter("min_child_weight", 1, 10, default_value=1)
+            max_depth = UniformIntegerHyperparameter("max_depth", 2, 10, default_value=6)
+            subsample = UniformFloatHyperparameter("subsample", 0.5, 1, default_value=1, q=0.05)
+            gamma = UniformFloatHyperparameter("gamma", 0, 1, default_value=0, q=0.1)
+            colsample_bytree = UniformFloatHyperparameter("colsample_bytree", 0.5, 1, default_value=1., q=0.05)
+            alpha = UniformFloatHyperparameter("alpha", 1e-10, 10, log=True, default_value=1e-10)
+            lambda_t = UniformFloatHyperparameter("lambda_t", 1e-10, 10, log=True, default_value=1e-10)
+            scale_pos_weight = CategoricalHyperparameter("scale_pos_weight", [0.01, 0.1, 1., 10, 100], default_value=1.)
 
-        cs.add_hyperparameters(
-            [n_estimators, eta, min_child_weight, max_depth, subsample, gamma, colsample_bytree, alpha, lambda_t,
-             scale_pos_weight])
-        return cs
+            cs.add_hyperparameters(
+                [n_estimators, eta, min_child_weight, max_depth, subsample, gamma, colsample_bytree, alpha, lambda_t,
+                 scale_pos_weight])
+            return cs
+        elif optimizer == 'tpe':
+            space = {'n_estimators': hp.randint('xgb_n_estimators', 451) + 50,
+                     'eta': hp.loguniform('xgb_eta', np.log(0.025), np.log(0.3)),
+                     'min_child_weight': hp.randint('xgb_min_child_weight', 10) + 1,
+                     'max_depth': hp.randint('xgb_max_depth', 9) + 2,
+                     'subsample': hp.uniform('xgb_subsample', 0.5, 1),
+                     'gamma': hp.uniform('xgb_gamma', 0, 1),
+                     'colsample_bytree': hp.uniform('xgb_colsample_bytree', 0.5, 1),
+                     'alpha': hp.loguniform('xgb_alpha', np.log(1e-10), np.log(10)),
+                     'lambda_t': hp.loguniform('xgb_lambda_t', np.log(1e-10), np.log(10)),
+                     'scale_pos_weight': hp.choice('xgb_scale_pos_weight', [0.01, 0.1, 1, 10, 100])}
+
+            init_trial = {'n_estimators': 200,
+                          'eta': 0.3,
+                          'min_child_weight': 1,
+                          'max_depth': 6,
+                          'subsample': 1,
+                          'gamma': 0,
+                          'colsample_bytree': 1,
+                          'alpha': 0,
+                          'lambda_t': 1,
+                          'scale_pos_weight': 1}
+
+            return space

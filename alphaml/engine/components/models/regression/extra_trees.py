@@ -2,9 +2,10 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
+from hyperopt import hp
+import numpy as np
 
 from alphaml.engine.components.models.base_model import BaseRegressionModel, IterativeComponentWithSampleWeight
-from alphaml.utils.model_util import convert_multioutput_multiclass_to_multilabel
 from alphaml.utils.common import check_none, check_for_bool
 from alphaml.utils.constants import *
 
@@ -72,28 +73,40 @@ class ExtraTreesRegressor(IterativeComponentWithSampleWeight, BaseRegressionMode
                 'output': (PREDICTIONS,)}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        cs = ConfigurationSpace()
+    def get_hyperparameter_search_space(dataset_properties=None, optimizer='smac'):
+        if optimizer == 'smac':
+            cs = ConfigurationSpace()
 
-        n_estimators = Constant("n_estimators", 100)
-        criterion = CategoricalHyperparameter(
-            "criterion", ["mse", "mae"], default_value="mse")
+            n_estimators = Constant("n_estimators", 100)
+            criterion = CategoricalHyperparameter(
+                "criterion", ["mse", "mae"], default_value="mse")
 
-        # The maximum number of features used in the forest is calculated as m^max_features, where
-        # m is the total number of features, and max_features is the hyperparameter specified below.
-        # The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This
-        # corresponds with Geurts' heuristic.
-        max_features = UniformFloatHyperparameter(
-            "max_features", 0., 1., default_value=0.5)
+            # The maximum number of features used in the forest is calculated as m^max_features, where
+            # m is the total number of features, and max_features is the hyperparameter specified below.
+            # The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This
+            # corresponds with Geurts' heuristic.
+            max_features = UniformFloatHyperparameter(
+                "max_features", 0., 1., default_value=0.5)
 
-        min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default_value=2)
-        min_samples_leaf = UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default_value=1)
+            min_samples_split = UniformIntegerHyperparameter(
+                "min_samples_split", 2, 20, default_value=2)
+            min_samples_leaf = UniformIntegerHyperparameter(
+                "min_samples_leaf", 1, 20, default_value=1)
 
-        bootstrap = CategoricalHyperparameter(
-            "bootstrap", ["True", "False"], default_value="False")
-        cs.add_hyperparameters([n_estimators, criterion, max_features, min_samples_split, min_samples_leaf,
-                                bootstrap])
+            bootstrap = CategoricalHyperparameter(
+                "bootstrap", ["True", "False"], default_value="False")
+            cs.add_hyperparameters([n_estimators, criterion, max_features, min_samples_split, min_samples_leaf,
+                                    bootstrap])
 
-        return cs
+            return cs
+        elif optimizer == 'tpe':
+            space = {'n_estimators': hp.choice('et_n_estimators', [100]),
+                     'criterion': hp.choice('et_criterion', ["mse", "mae"]),
+                     'max_features': hp.uniform('et_max_features', 0, 1),
+                     'min_samples_split': hp.randint('et_min_samples_split', 19) + 2,
+                     'min_samples_leaf': hp.randint('et_min_samples_leaf,', 20) + 1,
+                     'bootstrap': hp.choice('et_bootstrap', ["True", "False"])}
+
+            init_trial = {'n_estimators': 100, 'criterion': "mse", 'max_features': 0.5,
+                          'min_samples_split': 2, 'min_samples_leaf': 1, 'bootstrap': "False"}
+            return space

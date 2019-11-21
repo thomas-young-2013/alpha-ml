@@ -181,7 +181,7 @@ class EnsembleSelection(BaseEnsembleModel):
         self.weights_ = weights
 
     def calculate_score(self, pred, y_true):
-        if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+        if self.task_type == CLASSIFICATION:
             from sklearn.metrics import roc_auc_score
             if self.metric == roc_auc_score:
                 pred = pred[:, 1:2]
@@ -221,7 +221,7 @@ class EnsembleSelection(BaseEnsembleModel):
 
     def predict(self, X):
         pred = self.get_predictions(X)
-        if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+        if self.task_type == CLASSIFICATION:
             return np.argmax(pred, axis=-1)
         elif self.task_type == REGRESSION:
             return pred

@@ -28,17 +28,17 @@ def test_cash_module():
     result = []
     for i in range(1):
         x, y, _ = load_data('boston')
+        train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=0.2)
+        dm = DataManager(train_x, train_y)
+        cls = Regressor(exclude_models=['xgboost'],
+                        optimizer='smbo',
+                        ensemble_method='blending',
+                        ensemble_size=args.ensemble_size,
+                        ).fit(dm, metric='mse', update_mode=2, runcount=args.run_count)
 
-        dm = DataManager(x, y)
-        cls = Regressor(
-            optimizer='smbo',
-            ensemble_method='bagging',
-            ensemble_size=args.ensemble_size,
-        ).fit(dm, metric='mse', update_mode=2, runcount=args.run_count)
-
-        pred = cls.predict(dm.train_X)
+        pred = cls.predict(test_x)
         print(pred)
-        result.append(mean_squared_error(dm.train_y, pred))
+        result.append(mean_squared_error(test_y, pred))
         print(result)
 
 

@@ -53,10 +53,10 @@ def test_cash_module():
             X_test.append(sheet.row_values(i, start_colx=1))
             y_test.append(int(sheet.cell_value(i, 0)))
 
-        # pred = cls.predict_proba(X_test)
-        # print(pred)
-        # result.append(roc_auc_score(y_test, pred[:, 1:2]))
-        # print(result)
+        pred = cls.predict_proba(X_test)
+        print(pred)
+        result.append(roc_auc_score(y_test, pred[:, 1:2]))
+        print(result)
 
     import pickle
     with open('result.pkl', 'wb') as f:

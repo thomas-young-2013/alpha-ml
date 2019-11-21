@@ -1,5 +1,5 @@
 import numpy as np
-
+from hyperopt import hp
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, UnParametrizedHyperparameter
@@ -114,19 +114,31 @@ class PassiveAggressive(
                 'output': (PREDICTIONS,)}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        C = UniformFloatHyperparameter("C", 1e-5, 10, 1.0, log=True)
-        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        loss = CategoricalHyperparameter(
-            "loss", ["epsilon_insensitive", "squared_epsilon_insensitive"], default_value="epsilon_insensitive"
-        )
+    def get_hyperparameter_search_space(dataset_properties=None, optimizer='smac'):
+        if optimizer == 'smac':
+            C = UniformFloatHyperparameter("C", 1e-5, 10, 1.0, log=True)
+            fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
+            loss = CategoricalHyperparameter(
+                "loss", ["epsilon_insensitive", "squared_epsilon_insensitive"], default_value="squared_epsilon_insensitive"
+            )
 
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4,
-                                         log=True)
-        # Note: Average could also be an Integer if > 1
-        average = CategoricalHyperparameter('average', ['False', 'True'],
-                                            default_value='False')
+            tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4,
+                                             log=True)
+            # Note: Average could also be an Integer if > 1
+            average = CategoricalHyperparameter('average', ['False', 'True'],
+                                                default_value='False')
 
-        cs = ConfigurationSpace()
-        cs.add_hyperparameters([loss, fit_intercept, tol, C, average])
-        return cs
+            cs = ConfigurationSpace()
+            cs.add_hyperparameters([loss, fit_intercept, tol, C, average])
+            return cs
+        elif optimizer == 'tpe':
+            space = {'C': hp.loguniform("pa_C", np.log(1e-5), np.log(10)),
+                     'fit_intercept': hp.choice('pa_fit_intercept', ["True"]),
+                     'loss': hp.choice('pr_loss', ["epsilon_insensitive", "squared_epsilon_insensitive"]),
+                     'tol': hp.loguniform('pr_tol', np.log(1e-5), np.log(1e-1)),
+                     'average': hp.choice('pr_average', ["False", "True"])}
+
+            init_trial = {'C': 1, 'fit_intercept': "True", 'loss': "squared_epsilon_insensitive",
+                          'tol': 1e-4, 'average': "False"}
+
+            return space

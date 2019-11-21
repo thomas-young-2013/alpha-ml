@@ -11,7 +11,7 @@ class Blending(BaseEnsembleModel):
         super().__init__(model_info, ensemble_size, task_type, metric, evaluator, model_type)
 
         # We use Xgboost as default meta-learner
-        if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+        if self.task_type == CLASSIFICATION:
             if meta_learner == 'logistic':
                 from sklearn.linear_model.logistic import LogisticRegression
                 self.meta_learner = LogisticRegression(max_iter=1000)
@@ -31,7 +31,7 @@ class Blending(BaseEnsembleModel):
 
     def fit(self, dm: DataManager):
         # Split training data for phase 1 and phase 2
-        if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+        if self.task_type == CLASSIFICATION:
             x_p1, x_p2, y_p1, y_p2 = train_test_split(dm.train_X, dm.train_y, test_size=0.2, stratify=dm.train_y)
         elif self.task_type == REGRESSION:
             x_p1, x_p2, y_p1, y_p2 = train_test_split(dm.train_X, dm.train_y, test_size=0.2)
@@ -42,7 +42,7 @@ class Blending(BaseEnsembleModel):
                 estimator = self.get_estimator(config, x_p1, y_p1)
                 self.ensemble_models.append(estimator)
                 pred = self.get_proba_predictions(estimator, x_p2)
-                if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+                if self.task_type == CLASSIFICATION:
                     n_dim = np.array(pred).shape[1]
                     if n_dim == 2:
                         # Binary classificaion
@@ -76,7 +76,7 @@ class Blending(BaseEnsembleModel):
         feature_p2 = None
         for i, model in enumerate(self.ensemble_models):
             pred = self.get_proba_predictions(model, X)
-            if self.task_type in [CLASSIFICATION, HYPEROPT_CLASSIFICATION]:
+            if self.task_type == CLASSIFICATION:
                 n_dim = np.array(pred).shape[1]
                 if n_dim == 2:
                     # Binary classificaion
