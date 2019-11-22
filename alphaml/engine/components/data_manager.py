@@ -3,6 +3,7 @@ import pandas as pd
 
 from alphaml.utils.constants import *
 from alphaml.utils.feature_util import is_discrete, detect_abnormal_type
+from sklearn.preprocessing import LabelEncoder
 
 default_missing_values = ["n/a", "na", "--", "-", "?"]
 
@@ -62,6 +63,7 @@ class DataManager(object):
             self.feature_types.append(feat_type)
 
     def clean_data_with_nan(self, df, label_col, phase='train', drop_index=None, has_label=True):
+        """Clean the sample which the label is none."""
         columns_missed = df.columns[df.isnull().any()].tolist()
 
         if self.label_name is None:
@@ -70,11 +72,11 @@ class DataManager(object):
             label_colname = df.columns[label_col]
         else:
             label_colname = self.label_name
-
         self.label_name = label_colname
         if label_colname in columns_missed:
             labels = df[label_colname].values
-            row_idx = [idx for idx, val in enumerate(labels) if np.isnan(val)]
+            # An error will occur when the input of np.isnan is string.
+            row_idx = [idx for idx, val in enumerate(labels) if isinstance(val, float) and np.isnan(val)]
             # Delete the row with NaN label.
             df.drop(df.index[row_idx], inplace=True)
 
@@ -94,6 +96,7 @@ class DataManager(object):
     def load_train_csv(self, file_location, label_col=-1, drop_index=None,
                        keep_default_na=True, na_values=None, header='infer',
                        sep=','):
+        """Load the csv file from the user-specified file location."""
         # Set the NA values.
         if na_values is not None:
             na_set = set(self.na_values)
@@ -109,17 +112,26 @@ class DataManager(object):
                              na_values=self.na_values, header=header)
         else:
             raise ValueError('Unsupported file format: %s!' % file_location.split('.')[-1])
-
         # Drop the row with all NaNs.
-        df.dropna(how='all')
+        df.dropna(how='all', inplace=True)
         columns_missed = df.columns[df.isnull().any()].tolist()
+
+        if not isinstance(label_col, (int, str)):
+            raise TypeError("The `label_col` should be int or str, get the type " + str(type(label_col)))
+
+        if isinstance(label_col, str):
+            columns = list(df.columns)
+            for i in range(len(columns)):
+                if columns[i] == label_col:
+                    label_col = i
+                    break
 
         self.clean_data_with_nan(df, label_col, drop_index=drop_index)
 
         # set the feature types
         self.set_feat_types(df, columns_missed)
         self.train_X = df
-        return df, self.train_y
+        return df, LabelEncoder().fit_transform(self.train_y)
 
     def load_test_csv(self, file_location, has_label=False, label_col=-1,
                       drop_index=None, keep_default_na=True, header='infer',
