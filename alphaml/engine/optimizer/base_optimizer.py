@@ -7,6 +7,14 @@ from alphaml.utils.constants import MAX_INT
 
 class BaseOptimizer(object):
     def __init__(self, evaluator, config_space, data, metric, seed):
+        """
+
+        :param evaluator: Instance of Evaluator
+        :param config_space: ConfigSpace or dictionary depending on optimizing algorithm
+        :param data: Instance of DataManager
+        :param metric: function
+        :param seed: int
+        """
         # Prepare the basics for evaluator.
         assert isinstance(evaluator, (BaseClassificationEvaluator, BaseRegressionEvaluator))
         self.evaluator = evaluator

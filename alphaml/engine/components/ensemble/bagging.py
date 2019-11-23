@@ -6,9 +6,6 @@ from functools import reduce
 
 class Bagging(BaseEnsembleModel):
     def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml'):
-        '''
-        :param task_type: Majority voting for classification, average for regression
-        '''
         super().__init__(model_info, ensemble_size, task_type, metric, evaluator, model_type)
 
     def fit(self, dm: DataManager):

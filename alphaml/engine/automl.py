@@ -16,6 +16,7 @@ import numpy as np
 
 
 class AutoML(object):
+    """ The controller of a ML pipeline"""
     def __init__(
             self,
             time_budget,
@@ -27,6 +28,18 @@ class AutoML(object):
             exclude_models,
             optimizer_type,
             seed=42):
+        """
+
+        :param time_budget: int, total time limit
+        :param each_run_budget: int, time limit for each model
+        :param memory_limit: int
+        :param ensemble_method: str, algorithm for model ensemble
+        :param ensemble_size: int, number of models participating model ensemble
+        :param include_models: list, names of models included.
+        :param exclude_models: list, names of models excluded.
+        :param optimizer_type: str, algorithm hyper-parameter optimization
+        :param seed: int, random seed
+        """
         self.time_budget = time_budget
         self.each_run_budget = each_run_budget
         self.ensemble_method = ensemble_method
@@ -46,49 +59,54 @@ class AutoML(object):
 
     def fit(self, data, **kwargs):
         """
-        1. Define the ML pipeline.
-           1) the configuration space.
-
-        2. Search the promising configurations for this pipeline.
-
-        :param data: A DataManager or a DataFrame. Automated feature engineering will be applied if data is a DataFrame
+        An AutoML pipeline includes:
+            1) Automated feature engineering
+            2) Model selection and hyper-parameter optimization
+            3) Model Ensemble
+        :param data: A DataManager
         :return: self
         """
 
         task_type = kwargs['task_type']
         self.metric = kwargs['metric']
-        print(data.train_X.shape[1])
-        # Get the configuration space for the automl task.
-        config_space = self.component_manager.get_hyperparameter_search_space(task_type, include=self.include_models,
-                                                                              exclude=self.exclude_models)
+
+        # TODO: Automated FE
 
         self.logger.debug('The optimizer type is: %s' % self.optimizer_type)
-
-        # Conduct algorithm selection and hyperparameter optimization.
+        # Conduct model selection and hyper-parameter optimization.
         if self.optimizer_type == 'smbo':
+            # Generate the configuration space for the automl task.
+            config_space = self.component_manager.get_hyperparameter_search_space(task_type,
+                                                                                  include=self.include_models,
+                                                                                  exclude=self.exclude_models,
+                                                                                  optimizer='smac')
             # Create optimizer.
             self.optimizer = SMAC_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
-            self.optimizer.run()
         elif self.optimizer_type == 'mono_smbo':
+            # Generate the configuration space for the automl task.
+            config_space = self.component_manager.get_hyperparameter_search_space(task_type,
+                                                                                  include=self.include_models,
+                                                                                  exclude=self.exclude_models,
+                                                                                  optimizer='smac')
             # Create optimizer.
             self.optimizer = MONO_MAB_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
-            self.optimizer.run()
         elif self.optimizer_type == 'tpe':
+            # Generate the configuration space for the automl task.
             config_space = self.component_manager.get_hyperparameter_search_space(task_type,
                                                                                   include=self.include_models,
                                                                                   exclude=self.exclude_models,
                                                                                   optimizer='tpe')
             self.optimizer = TPE_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
-            self.optimizer.run()
         elif self.optimizer_type == 'mono_tpe_smbo':
+            # Generate the configuration space for the automl task.
             config_space = self.component_manager.get_hyperparameter_search_space(task_type,
                                                                                   include=self.include_models,
                                                                                   exclude=self.exclude_models,
                                                                                   optimizer='tpe')
             self.optimizer = MONO_MAB_TPE_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
-            self.optimizer.run()
         else:
             raise ValueError('UNSUPPORTED optimizer: %s' % self.optimizer)
+        self.optimizer.run()
 
         # Construct the ensemble model according to the ensemble method.
         model_infos = (self.optimizer.configs_list, self.optimizer.config_values)
@@ -114,9 +132,14 @@ class AutoML(object):
         return self
 
     def predict(self, X, **kwargs):
+        """
+        Make predictions for X.
+        For traditional ML task, fit the optimized model on the whole training data and predict the input data's labels.
+        :param X: array-like or sparse matrix of shape = [n_samples, n_features]
+        :return: pred: array of shape = [n_samples]
+        """
         if self.ensemble_model is None:
-            # For traditional ML task:
-            #   fit the optimized model on the whole training data and predict the input data's labels.
+
             self.evaluator.fit(self.optimizer.incumbent)
             pred = self.evaluator.predict(self.optimizer.incumbent, X)
             return pred
@@ -126,6 +149,12 @@ class AutoML(object):
             return pred
 
     def predict_proba(self, X, **kwargs):
+        """
+        Make predictions for X.
+        For traditional ML task, fit the optimized model on the whole training data and predict the input data's labels.
+        :param X: array-like or sparse matrix of shape = [n_samples, n_features]
+        :return: pred: array of shape = [n_samples, n_labels]
+        """
         if self.ensemble_model is None:
             # For traditional ML task:
             #   fit the optimized model on the whole training data and predict the input data's labels.
@@ -138,6 +167,12 @@ class AutoML(object):
             return pred
 
     def score(self, X, y):
+        """
+        Get the performance of prediction X according to label y
+        :param X: array-like or sparse matrix of shape = [n_samples, n_features]
+        :param y: array of shape = [n_samples] or [n_samples, n_labels]
+        :return: score: float
+        """
         pred_y = self.predict(X)
         score = self.metric(y, pred_y)
         return score
@@ -156,6 +191,7 @@ class AutoMLClassifier(AutoML):
                  seed=None):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
                          exclude_models, optimizer_type, seed)
+        # Define evaluator for classification
         if optimizer_type == 'smbo':
             self.evaluator = BaseClassificationEvaluator()
         elif optimizer_type == 'tpe':
@@ -178,6 +214,7 @@ class AutoMLRegressor(AutoML):
                  seed=None):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
                          exclude_models, optimizer_type, seed)
+        # Define evaluator for regression
         if optimizer_type == 'smbo':
             self.evaluator = BaseRegressionEvaluator()
         elif optimizer_type == 'tpe':

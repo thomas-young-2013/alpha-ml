@@ -19,6 +19,20 @@ class BaseEstimator(object):
             exclude_models=None,
             tmp_dir='./data/save_models',
             output_dir=None):
+        """
+
+        :param optimizer: str, algorithm hyper-parameter optimization
+        :param time_budget: int, total time limit
+        :param each_run_budget: int, time limit for each model
+        :param ensemble_method: str, algorithm for model ensemble
+        :param ensemble_size: int, number of models participating model ensemble
+        :param memory_limit: int
+        :param seed: int, random seed
+        :param include_models: list, names of models included.
+        :param exclude_models: list, names of models excluded.
+        :param tmp_dir: str, path to save models
+        :param output_dir: str
+        """
         self.optimizer_type = optimizer
         self.time_budget = time_budget
         self.each_run_budget = each_run_budget
@@ -42,6 +56,7 @@ class BaseEstimator(object):
                 os.remove(c_path)
 
     def build_engine(self):
+        """Build AutoML controller"""
         engine = self.get_automl()(
             time_budget=self.time_budget,
             each_run_budget=self.each_run_budget,
@@ -68,7 +83,7 @@ class BaseEstimator(object):
         return self._ml_engine.score(X, y)
 
     def predict_proba(self, X, batch_size=None, n_jobs=1):
-        return self._ml_engine.predict_proba(X, batch_size=None, n_jobs=1)
+        return self._ml_engine.predict_proba(X, batch_size=None, n_jobs=n_jobs)
 
     def get_automl(self):
         raise NotImplementedError()

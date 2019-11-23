@@ -13,28 +13,12 @@ class Regressor(BaseEstimator):
     """This class implements the regression task. """
 
     def fit(self, data, **kwargs):
-        """Fit the regressor to given training data.
-
-        Parameters
-        ----------
-
-        data : instance of DataManager.
-
-        metric : callable, optional (default='autosklearn.metrics.mean_squared_error').
-
-        dataset_name : str, optional (default=None)
-            Create nicer output. If None, a string will be determined by the
-            md5 hash of the dataset.
-
-        Returns
-        -------
-        self
-
         """
-        # feat_type = None if 'feat_type' not in kwargs else kwargs['feat_type']
-        # dataset_name = None if 'dataset_name' not in kwargs else kwargs['dataset_name']
-        # # The number of evaluations.
-        # runcount = None if 'runcount' not in kwargs else kwargs['runcount']
+        Fit the regressor to given training data.
+        :param data: instance of DataManager
+        :return: self
+        """
+        metric = mean_squared_error if 'metric' not in kwargs else kwargs['metric']
 
         # TODO:Automated feature engineering
         if isinstance(data, pd.DataFrame):
@@ -47,7 +31,6 @@ class Regressor(BaseEstimator):
         self.task_type = task_type
         kwargs['task_type'] = task_type
 
-        metric = mean_squared_error if 'metric' not in kwargs else kwargs['metric']
         metric = get_metric(metric)
         kwargs['metric'] = metric
 
@@ -56,17 +39,13 @@ class Regressor(BaseEstimator):
         return self
 
     def predict(self, X, batch_size=None, n_jobs=1):
-        """Predict classes for X.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features] or DataFrame
-
-        Returns
-        -------
-        y : array of shape = [n_samples] or [n_samples, n_labels]
+        """
+        Make predictions for X.
+        :param X: array-like or sparse matrix of shape = [n_samples, n_features]
+        :param batch_size: int
+        :param n_jobs: int
+        :return: y : array of shape = [n_samples] or [n_samples, n_labels]
             The predicted classes.
-
         """
         if isinstance(X, pd.DataFrame):
             if not isinstance(self.pre_pipeline, DP_Pipeline):

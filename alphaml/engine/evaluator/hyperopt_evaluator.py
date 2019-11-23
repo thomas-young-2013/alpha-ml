@@ -15,6 +15,11 @@ from alphaml.utils.constants import FAILED
 
 
 def get_dictionary(config):
+    """
+    Convert a configuration for TPE into dictionary.
+    :param config: A configuration in hyper-parameter space for TPE
+    :return: str, dictionary
+    """
     assert isinstance(config, dict)
     classifier_type = config['estimator'][0]
     space = config['estimator'][1]
@@ -22,6 +27,8 @@ def get_dictionary(config):
 
 
 class HyperoptClassificationEvaluator(BaseClassificationEvaluator):
+    """ A class to evaluate configurations for classification"""
+
     def __init__(self, val_size=0.33, kfold=None):
         self.val_size = val_size
         self.kfold = kfold
@@ -31,8 +38,14 @@ class HyperoptClassificationEvaluator(BaseClassificationEvaluator):
 
     @save_ease(save_dir='./data/save_models')
     def __call__(self, config, **kwargs):
+        """
+        Get the performance of a given configuration
+        :param config: A configuration in hyper-parameter space for TPE
+        :return: performance: float
+        """
         # Build the corresponding estimator.
         classifier_type, estimator = self.set_config(config)
+
         save_path = kwargs['save_path']
         # TODO: how to parallelize.
         if hasattr(estimator, 'n_jobs'):
@@ -113,6 +126,11 @@ class HyperoptClassificationEvaluator(BaseClassificationEvaluator):
             return 1 - metric
 
     def set_config(self, config):
+        """
+        Build an sklearn classifier
+        :param config: A configuration in hyper-parameter space for TPE
+        :return: str, sklearn classifier
+        """
         assert isinstance(config, dict)
         classifier_type, config = get_dictionary(config)
         if not hasattr(self, 'estimator'):
@@ -126,6 +144,11 @@ class HyperoptClassificationEvaluator(BaseClassificationEvaluator):
 
     @save_ease(save_dir='data/save_models')
     def fit(self, config, **kwargs):
+        """
+        Build and fit an sklearn classifier
+        :param config: A configuration in hyper-parameter space for TPE
+        :return: self
+        """
         # Build the corresponding estimator.
         save_path = kwargs['save_path']
 
@@ -138,6 +161,12 @@ class HyperoptClassificationEvaluator(BaseClassificationEvaluator):
 
     @save_ease(save_dir='data/save_models')
     def predict(self, config, test_X=None, **kwargs):
+        """
+        Load an sklearn classifier and predict classes for X.
+        :param config: A configuration in hyper-parameter space for TPE
+        :param test_X: Array-like or sparse matrix of shape = [n_samples, n_features]
+        :return: y_pred: Array of shape = [n_samples]
+        """
         save_path = kwargs['save_path']
         assert os.path.exists(save_path)
         with open(save_path, 'rb') as f:
@@ -153,6 +182,12 @@ class HyperoptClassificationEvaluator(BaseClassificationEvaluator):
 
     @save_ease(save_dir='data/save_models')
     def predict_proba(self, config, test_X=None, **kwargs):
+        """
+        Load an sklearn classifier and predict probabilities of classes for all samples X.
+        :param config: A configuration in hyper-parameter space for TPE
+        :param test_X: Array-like or sparse matrix of shape = [n_samples, n_features]
+        :return: y_pred : Array of shape = [n_samples, n_classes]
+        """
         save_path = kwargs['save_path']
         assert os.path.exists(save_path)
         with open(save_path, 'rb') as f:
@@ -168,6 +203,8 @@ class HyperoptClassificationEvaluator(BaseClassificationEvaluator):
 
 
 class HyperoptRegressionEvaluator(BaseRegressionEvaluator):
+    """ A class to evaluate configurations for classification"""
+
     def __init__(self, val_size=0.33, kfold=None):
         self.val_size = val_size
         self.kfold = kfold
@@ -177,6 +214,11 @@ class HyperoptRegressionEvaluator(BaseRegressionEvaluator):
 
     @save_ease(save_dir='./data/save_models')
     def __call__(self, config, **kwargs):
+        """
+        Get the performance of a given configuration
+        :param config: A configuration in hyper-parameter space for TPE
+        :return: performance: float
+        """
         # Build the corresponding estimator.
         regressor_type, estimator = self.set_config(config)
         save_path = kwargs['save_path']
@@ -245,6 +287,11 @@ class HyperoptRegressionEvaluator(BaseRegressionEvaluator):
             return metric
 
     def set_config(self, config):
+        """
+        Build an sklearn regressor
+        :param config: A configuration in hyper-parameter space for TPE
+        :return: str, sklearn regressor
+        """
         assert isinstance(config, dict)
         regressor_type, config = get_dictionary(config)
         if not hasattr(self, 'estimator'):
@@ -258,6 +305,11 @@ class HyperoptRegressionEvaluator(BaseRegressionEvaluator):
 
     @save_ease(save_dir='data/save_models')
     def fit(self, config, **kwargs):
+        """
+        Build and fit an sklearn regressor
+        :param config: A configuration in hyper-parameter space for TPE
+        :return: self
+        """
         # Build the corresponding estimator.
         save_path = kwargs['save_path']
         _, estimator = self.set_config(config)
@@ -270,6 +322,12 @@ class HyperoptRegressionEvaluator(BaseRegressionEvaluator):
     # Do not remove config
     @save_ease(save_dir='data/save_models')
     def predict(self, config, test_X=None, **kwargs):
+        """
+        Load an sklearn regressor and make predictions for X.
+        :param config: A configuration in hyper-parameter space for TPE
+        :param test_X: Array-like or sparse matrix of shape = [n_samples, n_features]
+        :return: y_pred: Array of shape = [n_samples]
+        """
         save_path = kwargs['save_path']
         assert os.path.exists(save_path)
         with open(save_path, 'rb') as f:

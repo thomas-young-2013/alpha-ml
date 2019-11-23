@@ -37,12 +37,12 @@ def test_cash_module():
 
         dm = DataManager(X_train, y_train)
         cls = Classifier(
-            # include_models=['liblinear_svc', 'libsvm_svc', 'xgboost', 'random_forest', 'logistic_regression', 'mlp'],
-            exclude_models=['xgboost'],
-            optimizer='tpe',
+            include_models=['liblinear_svc', 'libsvm_svc', 'xgboost', 'random_forest', 'logistic_regression', 'mlp'],
+            optimizer='smbo',
             ensemble_method='bagging',
             ensemble_size=args.ensemble_size,
-        ).fit(dm, metric='auc', update_mode=2, runcount=args.run_count)
+        )
+        cls.fit(dm, metric='auc', runcount=args.run_count)
 
         sheet = xlrd.open_workbook("lyqtestdata.xlsx")
         sheet = sheet.sheet_by_index(0)

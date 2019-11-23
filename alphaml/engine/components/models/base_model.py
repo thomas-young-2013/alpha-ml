@@ -29,6 +29,12 @@ class BaseModel(object):
         raise NotImplementedError()
 
     def set_hyperparameters(self, params, init_params=None):
+        """
+        The function set the class members according to params
+        :param params: dictionary, parameters
+        :param init_params: dictionary
+        :return:
+        """
         for param, value in params.items():
             if not hasattr(self, param):
                 raise ValueError('Cannot set hyperparameter %s for %s because '

@@ -1,6 +1,4 @@
 from alphaml.utils.constants import *
-from alphaml.engine.evaluator.base import BaseClassificationEvaluator, BaseRegressionEvaluator
-from alphaml.engine.evaluator.hyperopt_evaluator import HyperoptClassificationEvaluator
 from alphaml.utils.save_ease import save_ease
 
 import os
@@ -11,7 +9,19 @@ import logging
 
 
 class BaseEnsembleModel(object):
+    """Base class for model ensemble"""
+
     def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', threshold=0.2):
+        """
+
+        :param model_info: tuple of lists recording configurations and their performance
+        :param ensemble_size: int, number of models participating model ensemble
+        :param task_type: str
+        :param metric: function,
+        :param evaluator: Evaluator
+        :param model_type: str
+        :param threshold: float, threshold to obsolete candidates
+        """
         self.model_info = model_info
         self.model_type = model_type
         self.metric = metric
@@ -19,6 +29,7 @@ class BaseEnsembleModel(object):
         self.ensemble_models = list()
         self.threshold = threshold
         self.logger = logging.getLogger()
+
         if task_type in ['binary', 'multiclass', 'img_binary', 'img_multiclass', 'img_multilabel-indicator']:
             self.task_type = CLASSIFICATION
         elif task_type in ['continuous']:
@@ -30,8 +41,6 @@ class BaseEnsembleModel(object):
             self.ensemble_size = len(model_info[0])
         else:
             self.ensemble_size = ensemble_size
-        # Determine the best basic models (with the best performance) from models_infos.
-        # index_list = get_max_index(self.model_info[1], self.ensemble_size)
 
         # Determine the best basic models (the best for each algorithm) from models_infos.
         index_list = []
@@ -45,6 +54,7 @@ class BaseEnsembleModel(object):
             else:
                 return 1
 
+        # Get the top-k models for each algorithm
         best_performance = float('-INF')
         try:
             # SMAC
@@ -77,6 +87,7 @@ class BaseEnsembleModel(object):
                 sort_list = sorted(id_list, key=functools.cmp_to_key(cmp))
                 index_list.extend(sort_list[:top_k])
 
+        # Obsolete models which perform badly compared to the best model
         self.config_list = []
         for i in index_list:
             if abs((best_performance - self.model_info[1][i]) / best_performance) < self.threshold:
@@ -98,6 +109,15 @@ class BaseEnsembleModel(object):
 
     @save_ease(save_dir='./data/save_models')
     def get_estimator(self, config, x, y, if_load=False, if_show=False, **kwargs):
+        """
+        Build a sklearn estimator and fit it with training data
+        :param config: A configuration
+        :param x: Array-like or sparse matrix of shape = [n_samples, n_features]
+        :param y: Array of shape = [n_samples] or [n_samples, n_classes]
+        :param if_load: bool
+        :param if_show: bool
+        :return: sklearn model
+        """
         save_path = kwargs['save_path']
         if if_show:
             self.logger.info("Estimator path: " + save_path)
@@ -116,6 +136,12 @@ class BaseEnsembleModel(object):
         return estimator
 
     def get_proba_predictions(self, estimator, X):
+        """
+        Predict probabilities of classes for all samples X.
+        :param estimator: sklearn model
+        :param X: Array-like or sparse matrix of shape = [n_samples, n_features]
+        :return: Array of shape = [n_samples, n_classes]
+        """
         if self.task_type == CLASSIFICATION:
             return estimator.predict_proba(X)
         elif self.task_type == REGRESSION:

@@ -14,6 +14,11 @@ from alphaml.utils.constants import FAILED
 
 
 def update_config(config):
+    """
+    Convert a configuration for SMAC into dictionary.
+    :param config: A configuration in hyper-parameter space for SMAC
+    :return: config_dict: dictionary
+    """
     config_dict = {}
     for param in config:
         if param == 'estimator':
@@ -28,7 +33,14 @@ def update_config(config):
 
 
 class BaseClassificationEvaluator(object):
+    """ A class to evaluate configurations for classification"""
+
     def __init__(self, val_size=0.33, kfold=None):
+        """
+
+        :param val_size: float from (0,1), used if kfold is None
+        :param kfold: int or float from (0,1)
+        """
         self.val_size = val_size
         self.kfold = kfold
         self.data_manager = None
@@ -37,8 +49,14 @@ class BaseClassificationEvaluator(object):
 
     @save_ease(save_dir='./data/save_models')
     def __call__(self, config, **kwargs):
+        """
+        Get the performance of a given configuration
+        :param config: A configuration in hyper-parameter space for SMAC
+        :return: performance: float
+        """
         # Build the corresponding estimator.
         classifier_type, estimator = self.set_config(config)
+
         save_path = kwargs['save_path']
         # TODO: how to parallelize.
         if hasattr(estimator, 'n_jobs'):
@@ -57,7 +75,7 @@ class BaseClassificationEvaluator(object):
             train_X, val_X, train_y, val_y = train_test_split(data_X, data_y,
                                                               test_size=self.val_size,
                                                               stratify=data_y,
-                                                              random_state=42, )
+                                                              random_state=42)
 
             # Fit the estimator on the training data.
             estimator.fit(train_X, train_y)
@@ -119,6 +137,11 @@ class BaseClassificationEvaluator(object):
             return 1 - metric
 
     def set_config(self, config):
+        """
+        Build an sklearn classifier
+        :param config: A configuration in hyper-parameter space for SMAC
+        :return: str, sklearn classifier
+        """
         if not hasattr(self, 'estimator'):
             # Build the corresponding estimator.
             params_num = len(config.get_dictionary().keys()) - 1
@@ -132,6 +155,11 @@ class BaseClassificationEvaluator(object):
 
     @save_ease(save_dir='data/save_models')
     def fit(self, config, **kwargs):
+        """
+        Build and fit an sklearn classifier
+        :param config: A configuration in hyper-parameter space for SMAC
+        :return: self
+        """
         # Build the corresponding estimator.
         save_path = kwargs['save_path']
         _, estimator = self.set_config(config)
@@ -140,10 +168,17 @@ class BaseClassificationEvaluator(object):
         with open(save_path, 'wb') as f:
             pkl.dump(estimator, f)
             self.logger.info("Estimator retrained!")
+        return self
 
     # Do not remove config
     @save_ease(save_dir='data/save_models')
     def predict(self, config, test_X=None, **kwargs):
+        """
+        Load an sklearn classifier and predict classes for X.
+        :param config: A configuration in hyper-parameter space for SMAC
+        :param test_X: Array-like or sparse matrix of shape = [n_samples, n_features]
+        :return: y_pred: Array of shape = [n_samples]
+        """
         save_path = kwargs['save_path']
         assert os.path.exists(save_path)
         with open(save_path, 'rb') as f:
@@ -159,6 +194,12 @@ class BaseClassificationEvaluator(object):
 
     @save_ease(save_dir='data/save_models')
     def predict_proba(self, config, test_X=None, **kwargs):
+        """
+        Load an sklearn classifier and predict probabilities of classes for all samples X.
+        :param config: A configuration in hyper-parameter space for SMAC
+        :param test_X: Array-like or sparse matrix of shape = [n_samples, n_features]
+        :return: y_pred : Array of shape = [n_samples, n_classes]
+        """
         save_path = kwargs['save_path']
         assert os.path.exists(save_path)
         with open(save_path, 'rb') as f:
@@ -174,7 +215,14 @@ class BaseClassificationEvaluator(object):
 
 
 class BaseRegressionEvaluator(object):
+    """ A class to evaluate configurations for classification"""
+
     def __init__(self, val_size=0.33, kfold=None):
+        """
+
+        :param val_size: float from (0,1), used if kfold is None
+        :param kfold: int or float from (0,1)
+        """
         self.val_size = val_size
         self.kfold = kfold
         self.data_manager = None
@@ -183,6 +231,11 @@ class BaseRegressionEvaluator(object):
 
     @save_ease(save_dir='./data/save_models')
     def __call__(self, config, **kwargs):
+        """
+        Get the performance of a given configuration
+        :param config: A configuration in hyper-parameter space for SMAC
+        :return: performance: float
+        """
         # Build the corresponding estimator.
         regressor_type, estimator = self.set_config(config)
         save_path = kwargs['save_path']
@@ -251,6 +304,11 @@ class BaseRegressionEvaluator(object):
             return metric
 
     def set_config(self, config):
+        """
+        Build an sklearn regressor
+        :param config: A configuration in hyper-parameter space for SMAC
+        :return: str, sklearn regressor
+        """
         if not hasattr(self, 'estimator'):
             # Build the corresponding estimator.
             params_num = len(config.get_dictionary().keys()) - 1
@@ -264,6 +322,11 @@ class BaseRegressionEvaluator(object):
 
     @save_ease(save_dir='data/save_models')
     def fit(self, config, **kwargs):
+        """
+        Build and fit an sklearn regressor
+        :param config: A configuration in hyper-parameter space for SMAC
+        :return: self
+        """
         # Build the corresponding estimator.
         save_path = kwargs['save_path']
         _, estimator = self.set_config(config)
@@ -272,10 +335,17 @@ class BaseRegressionEvaluator(object):
         with open(save_path, 'wb') as f:
             pkl.dump(estimator, f)
             self.logger.info("Estimator retrained!")
+        return self
 
     # Do not remove config
     @save_ease(save_dir='data/save_models')
     def predict(self, config, test_X=None, **kwargs):
+        """
+        Load an sklearn regressor and make predictions for X.
+        :param config: A configuration in hyper-parameter space for SMAC
+        :param test_X: Array-like or sparse matrix of shape = [n_samples, n_features]
+        :return: y_pred: Array of shape = [n_samples]
+        """
         save_path = kwargs['save_path']
         assert os.path.exists(save_path)
         with open(save_path, 'rb') as f:
