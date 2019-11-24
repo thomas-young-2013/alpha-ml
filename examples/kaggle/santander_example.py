@@ -3,7 +3,7 @@ import pandas as pd
 import warnings
 
 from alphaml.engine.components.data_manager import DataManager
-from alphaml.engine.components.feature_engineering.auto_feature import AutoFeature
+from alphaml.estimators.classifier import Classifier
 
 warnings.filterwarnings("ignore")
 
@@ -21,11 +21,14 @@ x_train = df_train.drop(labels=["target"], axis=1).values
 y_train = df_train["target"].values
 x_test = df_test.values
 
-del df_train
-del df_test
+dm = DataManager()
+dm.train_X = x_train
+dm.train_y = y_train
 
-dm = DataManager(x_train, y_train)
-dm.test_X = x_test
 
-auto_feature = AutoFeature(metrics="auc")
-dm = auto_feature.fit(dm, generated_num=100)
+clf = Classifier()
+clf.fit(dm, metric="auc", runcount=200)
+
+submission = pd.read_csv(home_path + "/datasets/titanic/gender_submission.csv")
+submission["Survived"] = clf.predict(x_test)
+submission.to_csv(home_path + "/datasets/titanic/alpha-ml.csv", index=False)
