@@ -2,7 +2,7 @@ import os
 import json
 import pickle as pkl
 from alphaml.engine.components.models.image_classification import _img_classifiers
-from alphaml.engine.evaluator.base import BaseClassificationEvaluator, update_config
+from alphaml.engine.evaluator.base import BaseClassificationEvaluator, get_smac_config
 from alphaml.utils.save_ease import save_ease
 
 
@@ -41,7 +41,7 @@ class BaseImgEvaluator(BaseClassificationEvaluator):
             estimator = _img_classifiers[classifier_type]()
         else:
             estimator = self.estimator
-        config = update_config(config)
+        config = get_smac_config(config)
         estimator.set_hyperparameters(config)
         estimator.set_model_config(self.inputshape, self.classnum)
         return classifier_type, estimator

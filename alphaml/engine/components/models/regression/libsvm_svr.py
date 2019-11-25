@@ -3,6 +3,9 @@ from ConfigSpace.conditions import EqualsCondition, InCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
+from hyperopt import hp
+import numpy as np
+
 from alphaml.utils.constants import *
 from alphaml.utils.common import check_none, check_for_bool
 from alphaml.engine.components.models.base_model import BaseRegressionModel
@@ -24,6 +27,16 @@ class LibSVM_SVR(BaseRegressionModel):
 
     def fit(self, X, Y):
         from sklearn.svm import SVR
+
+        # Nested kernel
+        if isinstance(self.kernel, tuple):
+            nested_kernel = self.kernel
+            self.kernel = nested_kernel[0]
+            if self.kernel == 'poly':
+                self.degree = nested_kernel[1]['degree']
+                self.coef0 = nested_kernel[1]['coef0']
+            elif self.kernel == 'sigmoid':
+                self.coef0 = nested_kernel[1]['coef0']
 
         self.C = float(self.C)
         if self.degree is None:
@@ -83,7 +96,6 @@ class LibSVM_SVR(BaseRegressionModel):
             degree = UniformIntegerHyperparameter("degree", 2, 5, default_value=3)
             gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
                                                log=True, default_value=0.1)
-            # TODO this is totally ad-hoc
             coef0 = UniformFloatHyperparameter("coef0", -1, 1, default_value=0)
             # probability is no hyperparameter, but an argument to the SVM algo
             shrinking = CategoricalHyperparameter("shrinking", ["True", "False"],
@@ -103,3 +115,23 @@ class LibSVM_SVR(BaseRegressionModel):
             cs.add_condition(coef0_condition)
 
             return cs
+        elif optimizer == 'tpe':
+            coef0 = hp.uniform("libsvm_coef0", -1, 1)
+            space = {'C': hp.loguniform('libsvm_C', np.log(0.03125), np.log(32768)),
+                     'gamma': hp.loguniform('libsvm_gamma', np.log(3.0517578125e-5), np.log(8)),
+                     'shrinking': hp.choice('libsvm_shrinking', ["True", "False"]),
+                     'tol': hp.loguniform('libsvm_tol', np.log(1e-5), np.log(1e-1)),
+                     'max_iter': hp.choice('libsvm_max_iter', [2000]),
+                     'kernel': hp.choice('libsvm_kernel',
+                                         [("poly", {'degree': hp.randint('libsvm_degree', 4) + 2, 'coef0': coef0}),
+                                          ("rbf", {}),
+                                          ("sigmoid", {'coef0': coef0})])}
+
+            init_trial = {'C': 1,
+                          'gamma': 0.1,
+                          'shrinking': "True",
+                          'tol': 1e-3,
+                          'max_iter': 2000,
+                          'kernel': ("rbf", {})}
+
+            return space

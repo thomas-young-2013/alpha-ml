@@ -173,7 +173,7 @@ class MLP(IterativeComponentWithSampleWeight, BaseRegressionModel):
 
             return cs
         elif optimizer == 'tpe':
-            space = {'hidden_size': hp.randint("mlp_hidden_size", 450) + 50,
+            space = {'hidden_size': hp.randint("mlp_hidden_size", 400) + 100,
                      'activation': hp.choice('mlp_activation', ["identity", "logistic", "tanh", "relu"]),
                      'solver': hp.choice('mlp_solver',
                                          [("sgd", {'learning_rate': hp.choice('mlp_learning_rate',

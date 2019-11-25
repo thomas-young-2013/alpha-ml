@@ -3,9 +3,10 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, Constant
 from ConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
+from hyperopt import hp
+import numpy as np
 
 from alphaml.utils.constants import *
-from alphaml.utils.model_util import softmax
 from alphaml.utils.common import check_none, check_for_bool
 from alphaml.engine.components.models.base_model import BaseRegressionModel
 
@@ -26,6 +27,12 @@ class LibLinear_SVR(BaseRegressionModel):
 
     def fit(self, X, Y):
         from sklearn.svm import LinearSVR
+
+        # In case of nested loss
+        if isinstance(self.loss, dict):
+            combination = self.loss
+            self.loss = combination['loss']
+            self.dual = combination['dual']
 
         self.C = float(self.C)
         self.tol = float(self.tol)
@@ -71,7 +78,6 @@ class LibLinear_SVR(BaseRegressionModel):
             loss = CategoricalHyperparameter(
                 "loss", ["epsilon_insensitive", "squared_epsilon_insensitive"], default_value="epsilon_insensitive")
             dual = CategoricalHyperparameter("dual", ['True', 'False'], default_value='True')
-            # This is set ad-hoc
             tol = UniformFloatHyperparameter(
                 "tol", 1e-5, 1e-1, default_value=1e-4, log=True)
             C = UniformFloatHyperparameter(
@@ -87,3 +93,22 @@ class LibLinear_SVR(BaseRegressionModel):
             )
             cs.add_forbidden_clause(dual_and_loss)
             return cs
+        elif optimizer == 'tpe':
+            space = {'loss': hp.choice('liblinear_combination', [{'loss': "epsilon_insensitive", 'dual': "True"},
+                                                                 {'loss': "squared_epsilon_insensitive",
+                                                                  'dual': "True"},
+                                                                 {'loss': "squared_epsilon_insensitive",
+                                                                  'dual': "False"}]),
+                     'dual': None,
+                     'tol': hp.loguniform('liblinear_tol', np.log(1e-5), np.log(1e-1)),
+                     'C': hp.loguniform('liblinear_C', np.log(0.03125), np.log(32768)),
+                     'fit_intercept': hp.choice('liblinear_fit_intercept', ["True"]),
+                     'intercept_scaling': hp.choice('liblinear_intercept_scaling', [1])}
+
+            init_trial = {'loss': {'loss': "epsilon_insensitive", 'dual': "True"},
+                          'tol': 1e-4,
+                          'C': 1,
+                          'fit_intercept': "True",
+                          'intercept_scaling': 1}
+
+            return space

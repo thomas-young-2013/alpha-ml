@@ -1,5 +1,5 @@
 import warnings
-from sklearn.preprocessing import LabelEncoder
+import numpy as np
 import sys
 import argparse
 
@@ -23,45 +23,44 @@ def test_cash_module():
     from alphaml.estimators.classifier import Classifier
     import random
     from sklearn.metrics import roc_auc_score
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import OneHotEncoder
+
     result = []
     for i in range(1):
         import xlrd
-        sheet = xlrd.open_workbook("lyqdata.xlsx")
+        sheet = xlrd.open_workbook("ybai_Keratoconus_TJ_20190425.xlsx")
         sheet = sheet.sheet_by_index(0)
         nrows = sheet.nrows
         X_train = []
         y_train = []
-        for i in range(2, nrows):
+
+        for i in range(1, nrows):
             X_train.append(sheet.row_values(i, start_colx=1))
             y_train.append(int(sheet.cell_value(i, 0)))
 
+        encoder = OneHotEncoder()
+        encoder.fit(np.reshape(y_train, (len(y_train), 1)))
+        X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2, stratify=y_train)
+
         dm = DataManager(X_train, y_train)
         cls = Classifier(
-            #include_models=['liblinear_svc', 'libsvm_svc', 'xgboost', 'random_forest', 'logistic_regression', 'mlp'],
-            include_models=['liblinear_svc'],
+            # include_models=['liblinear_svc', 'libsvm_svc', 'xgboost', 'random_forest', 'logistic_regression', 'mlp'],
             optimizer='smbo',
             ensemble_method='bagging',
             ensemble_size=args.ensemble_size,
         )
         cls.fit(dm, metric='auc', runcount=args.run_count)
 
-        sheet = xlrd.open_workbook("lyqtestdata.xlsx")
-        sheet = sheet.sheet_by_index(0)
-        nrows = sheet.nrows
-        X_test = []
-        y_test = []
-        for i in range(1, nrows):
-            X_test.append(sheet.row_values(i, start_colx=1))
-            y_test.append(int(sheet.cell_value(i, 0)))
-
         pred = cls.predict_proba(X_test)
         print(pred)
-        result.append(roc_auc_score(y_test, pred[:, 1:2]))
+        y_test = encoder.transform(np.reshape(y_test, (len(y_test), 1))).toarray()
+        result.append(roc_auc_score(y_test, pred))
         print(result)
 
-    import pickle
-    with open('result.pkl', 'wb') as f:
-        pickle.dump(result, f)
+        import pickle
+        with open('result.pkl', 'wb') as f:
+            pickle.dump(result, f)
 
 
 if __name__ == "__main__":

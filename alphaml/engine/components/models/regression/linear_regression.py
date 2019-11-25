@@ -37,3 +37,5 @@ class LinearRegressor(BaseRegressionModel):
         if optimizer == 'smac':
             cs = ConfigurationSpace()
             return cs
+        elif optimizer == 'tpe':
+            return {}

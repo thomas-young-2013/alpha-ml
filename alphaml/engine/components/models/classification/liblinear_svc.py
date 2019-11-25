@@ -149,7 +149,7 @@ class LibLinear_SVC(BaseClassificationModel):
                      'fit_intercept': hp.choice('liblinear_fit_intercept', ["True"]),
                      'intercept_scaling': hp.choice('liblinear_intercept_scaling', [1])}
 
-            init_trial = {'combination': {'penalty': "l2", 'loss': "squared_hinge", 'dual': "True"},
+            init_trial = {'penalty': {'penalty': "l2", 'loss': "squared_hinge", 'dual': "True"},
                           'tol': 1e-4,
                           'C': 1,
                           'multiclass': "ovr",

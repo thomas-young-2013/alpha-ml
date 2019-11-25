@@ -128,7 +128,7 @@ class BaseEnsembleModel(object):
                 self.logger.info("Estimator loaded from " + save_path)
         else:
             save_path = kwargs['save_path']
-            _, estimator = self.evaluator.set_config(config)
+            _, estimator = self.evaluator.set_config(config, self.evaluator.optimizer)
             estimator.fit(x, y)
             with open(save_path, 'wb') as f:
                 pkl.dump(estimator, f)

@@ -2,7 +2,6 @@ import logging
 from alphaml.engine.components.components_manager import ComponentsManager
 from alphaml.engine.components.data_manager import DataManager
 from alphaml.engine.evaluator.base import BaseClassificationEvaluator, BaseRegressionEvaluator
-from alphaml.engine.evaluator.hyperopt_evaluator import HyperoptClassificationEvaluator, HyperoptRegressionEvaluator
 from alphaml.engine.optimizer.smac_smbo import SMAC_SMBO
 from alphaml.engine.optimizer.monotone_mab_optimizer import MONO_MAB_SMBO
 from alphaml.engine.optimizer.monotone_mab_tpe_optimizer import MONO_MAB_TPE_SMBO
@@ -17,6 +16,7 @@ import numpy as np
 
 class AutoML(object):
     """ The controller of a ML pipeline"""
+
     def __init__(
             self,
             time_budget,
@@ -193,9 +193,9 @@ class AutoMLClassifier(AutoML):
                          exclude_models, optimizer_type, seed)
         # Define evaluator for classification
         if optimizer_type == 'smbo':
-            self.evaluator = BaseClassificationEvaluator()
+            self.evaluator = BaseClassificationEvaluator(optimizer='smac')
         elif optimizer_type == 'tpe':
-            self.evaluator = HyperoptClassificationEvaluator()
+            self.evaluator = BaseClassificationEvaluator(optimizer='tpe')
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)
@@ -216,9 +216,9 @@ class AutoMLRegressor(AutoML):
                          exclude_models, optimizer_type, seed)
         # Define evaluator for regression
         if optimizer_type == 'smbo':
-            self.evaluator = BaseRegressionEvaluator()
+            self.evaluator = BaseRegressionEvaluator(optimizer='smac')
         elif optimizer_type == 'tpe':
-            self.evaluator = HyperoptRegressionEvaluator()
+            self.evaluator = BaseRegressionEvaluator(optimizer='tpe')
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)

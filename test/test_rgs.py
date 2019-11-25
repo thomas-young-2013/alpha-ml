@@ -30,8 +30,9 @@ def test_cash_module():
         x, y, _ = load_data('boston')
         train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=0.2)
         dm = DataManager(train_x, train_y)
-        cls = Regressor(exclude_models=['xgboost'],
-                        optimizer='smbo',
+        cls = Regressor(exclude_models=['xgboost','mlp'],
+                        #include_models=['mlp'],
+                        optimizer='tpe',
                         ensemble_method='blending',
                         ensemble_size=args.ensemble_size,
                         ).fit(dm, metric='mse', update_mode=2, runcount=args.run_count)
