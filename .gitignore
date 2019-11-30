@@ -11,7 +11,7 @@ docs/sources/*
 docs/theme/fonts/*
 docs/theme/img/*
 tags
-alpha-ml.egg-info
+*.egg-info/
 examples/img/*
 
 # test-related
@@ -27,3 +27,5 @@ examples/img/*
 smac3*/
 
 data/*
+*.log
+

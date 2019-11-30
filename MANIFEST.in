@@ -1,0 +1,3 @@
+include alphaml/utils/logging_configuration.json
+recursive-include alphaml *.pyx
+include requirements.txt
