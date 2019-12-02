@@ -1,5 +1,6 @@
 import time
 import pickle
+import os
 import datetime
 from datetime import timezone
 import numpy as np
@@ -38,7 +39,8 @@ class TPE_SMBO(BaseOptimizer):
         for trial in self.trials.trials:
             config = trial['result']['config']
             perf = 1 - trial['result']['loss']
-            time_taken = trial['book_time'].replace(tzinfo=timezone.utc).astimezone(tz=None).timestamp() - self.start_time
+            time_taken = trial['book_time'].replace(tzinfo=timezone.utc).astimezone(
+                tz=None).timestamp() - self.start_time
             self.configs_list.append(config)
             self.config_values.append(perf)
             self.timing_list.append(time_taken)
@@ -58,5 +60,8 @@ class TPE_SMBO(BaseOptimizer):
             data['perfs'] = self.config_values
             data['time_cost'] = self.timing_list
             dataset_id = self.result_file.split('_')[0]
+            save_dir = 'data/%s/' % dataset_id
+            if not os.path.exists(save_dir):
+                os.mkdir(save_dir)
             with open('data/%s/' % dataset_id + self.result_file, 'wb') as f:
                 pickle.dump(data, f)

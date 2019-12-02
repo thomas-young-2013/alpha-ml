@@ -1,6 +1,7 @@
 import time
 import pickle
 import numpy as np
+import os
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from litesmac.scenario.scenario import Scenario
 from litesmac.facade.smac_facade import SMAC
@@ -200,5 +201,8 @@ class MONO_MAB_SMBO(BaseOptimizer):
             data['perfs'] = self.config_values
             data['time_cost'] = self.timing_list
             dataset_id = self.result_file.split('_')[0]
+            save_dir = 'data/%s/' % dataset_id
+            if not os.path.exists(save_dir):
+                os.mkdir(save_dir)
             with open('data/%s/' % dataset_id + self.result_file, 'wb') as f:
                 pickle.dump(data, f)

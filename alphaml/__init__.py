@@ -3,16 +3,18 @@ import os
 import sys
 
 from alphaml.utils import dependencies
-from alphaml.__version__ import __version__
 from alphaml.utils.logging_utils import setup_logging
 
 __MANDATORY_PACKAGES__ = '''
-numpy>=1.9
-scikit-learn>=0.19,<0.20
-lockfile>=0.10
-smac>=0.8,<0.9
-pyrfr>=0.6.1,<0.8
-ConfigSpace>=0.4.0,<0.5
+numpy==1.16.4
+six==1.11.0
+scipy==1.3.0
+pandas==0.23.0
+scikit-learn==0.21.3
+tqdm==4.34.0
+hyperopt==0.1.2
+ConfigSpace==0.4.11
+smac==0.11.1
 '''
 
 dependencies.verify_packages(__MANDATORY_PACKAGES__)

@@ -1,5 +1,6 @@
 import time
 import pickle
+import os
 import numpy as np
 from smac.scenario.scenario import Scenario
 from smac.facade.smac_facade import SMAC
@@ -71,5 +72,8 @@ class SMAC_SMBO(BaseOptimizer):
             data['perfs'] = self.config_values
             data['time_cost'] = self.timing_list
             dataset_id = self.result_file.split('_')[0]
+            save_dir = 'data/%s/' % dataset_id
+            if not os.path.exists(save_dir):
+                os.mkdir(save_dir)
             with open('data/%s/' % dataset_id + self.result_file, 'wb') as f:
                 pickle.dump(data, f)
