@@ -72,7 +72,7 @@ class BaseClassificationEvaluator(object):
         # Build the corresponding estimator.
         classifier_type, estimator = self.set_config(config, self.optimizer)
 
-        save_path = kwargs['save_path']
+        # save_path = kwargs['save_path']
         # TODO: how to parallelize.
         if hasattr(estimator, 'n_jobs'):
             setattr(estimator, 'n_jobs', multiprocessing.cpu_count() - 1)
@@ -101,9 +101,9 @@ class BaseClassificationEvaluator(object):
             # Fit the estimator on the training data.
             estimator.fit(train_X, train_y)
             self.logger.info('<FIT MODEL> finished!')
-            with open(save_path, 'wb') as f:
-                pkl.dump(estimator, f)
-                self.logger.info('<MODEL SAVED IN %s>' % save_path)
+            # with open(save_path, 'wb') as f:
+            #     pkl.dump(estimator, f)
+            #     self.logger.info('<MODEL SAVED IN %s>' % save_path)
 
             # In case of failed estimator
             try:
@@ -133,9 +133,9 @@ class BaseClassificationEvaluator(object):
                 # Fit the estimator on the training data.
                 estimator.fit(train_X, train_y)
                 self.logger.info('<FIT MODEL> %d/%d finished!' % (i + 1, self.kfold))
-                with open(save_path, 'wb') as f:
-                    pkl.dump(estimator, f)
-                    self.logger.info('<MODEL SAVED IN %s>' % save_path)
+                # with open(save_path, 'wb') as f:
+                #     pkl.dump(estimator, f)
+                #     self.logger.info('<MODEL SAVED IN %s>' % save_path)
 
                 # In case of failed estimator
                 try:
@@ -271,7 +271,7 @@ class BaseRegressionEvaluator(object):
         """
         # Build the corresponding estimator.
         regressor_type, estimator = self.set_config(config, self.optimizer)
-        save_path = kwargs['save_path']
+        # save_path = kwargs['save_path']
         # TODO: how to parallelize.
         if hasattr(estimator, 'n_jobs'):
             setattr(estimator, 'n_jobs', multiprocessing.cpu_count() - 1)
@@ -294,9 +294,9 @@ class BaseRegressionEvaluator(object):
             # Fit the estimator on the training data.
             estimator.fit(train_X, train_y)
             self.logger.info('<FIT MODEL> finished!')
-            with open(save_path, 'wb') as f:
-                pkl.dump(estimator, f)
-                self.logger.info('<MODEL SAVED IN %s>' % save_path)
+            # with open(save_path, 'wb') as f:
+            #     pkl.dump(estimator, f)
+            #     self.logger.info('<MODEL SAVED IN %s>' % save_path)
 
             # In case of failed estimator
             try:
@@ -321,9 +321,9 @@ class BaseRegressionEvaluator(object):
                 # Fit the estimator on the training data.
                 estimator.fit(train_X, train_y)
                 self.logger.info('<FIT MODEL> %d/%d finished!' % (i + 1, self.kfold))
-                with open(save_path, 'wb') as f:
-                    pkl.dump(estimator, f)
-                    self.logger.info('<MODEL SAVED IN %s>' % save_path)
+                # with open(save_path, 'wb') as f:
+                #     pkl.dump(estimator, f)
+                #     self.logger.info('<MODEL SAVED IN %s>' % save_path)
 
                 # In case of failed estimator
                 try:

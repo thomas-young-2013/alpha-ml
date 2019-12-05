@@ -13,6 +13,8 @@ class BaseEstimator(object):
             each_run_budget=360,
             ensemble_method='none',
             ensemble_size=50,
+            cross_valid=True,
+            k_fold=3,
             memory_limit=1024,
             seed=None,
             include_models=None,
@@ -26,6 +28,8 @@ class BaseEstimator(object):
         :param each_run_budget: int, time limit for each model
         :param ensemble_method: str, algorithm for model ensemble
         :param ensemble_size: int, number of models participating model ensemble
+        :param cross_valid: bool
+        :param k_fold: int
         :param memory_limit: int
         :param seed: int, random seed
         :param include_models: list, names of models included.
@@ -41,6 +45,8 @@ class BaseEstimator(object):
         self.memory_limit = memory_limit
         self.include_models = include_models
         self.exclude_models = exclude_models
+        self.cross_valid = cross_valid
+        self.k_fold = k_fold
         self.seed = seed
         self.tmp_dir = tmp_dir
         self.output_dir = output_dir
@@ -66,6 +72,8 @@ class BaseEstimator(object):
             include_models=self.include_models,
             exclude_models=self.exclude_models,
             optimizer_type=self.optimizer_type,
+            cross_valid=self.cross_valid,
+            k_fold=self.k_fold,
             seed=self.seed
         )
         return engine

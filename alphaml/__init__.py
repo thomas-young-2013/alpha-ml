@@ -5,16 +5,29 @@ import sys
 from alphaml.utils import dependencies
 from alphaml.utils.logging_utils import setup_logging
 
+__version__ = '0.1.0'
 __MANDATORY_PACKAGES__ = '''
-numpy==1.16.4
-six==1.11.0
-scipy==1.3.0
-pandas==0.23.0
-scikit-learn==0.21.3
-tqdm==4.34.0
-hyperopt==0.1.2
-ConfigSpace==0.4.11
-smac==0.11.1
+tqdm
+xgboost
+hyperopt
+pynisher
+pyrfr
+smac==0.8.0
+ConfigSpace
+pyparsing
+lockfile
+pyyaml
+liac-arff
+psutil
+sobol_seq
+joblib
+scikit-learn
+setuptools
+nose
+scipy
+Cython
+pandas
+numpy
 '''
 
 dependencies.verify_packages(__MANDATORY_PACKAGES__)
@@ -32,6 +45,5 @@ if sys.version_info < (3, 5):
         'Unsupported python version %s found. Auto-sklearn requires Python '
         '3.5 or higher.' % sys.version_info
     )
-
 
 setup_logging()

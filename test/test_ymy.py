@@ -37,10 +37,10 @@ def test_cash_module():
 
         dm = DataManager(X_train, y_train)
         cls = Classifier(
-            #include_models=['liblinear_svc', 'libsvm_svc', 'xgboost', 'random_forest', 'logistic_regression', 'mlp'],
-            include_models=['liblinear_svc'],
+            include_models=['liblinear_svc', 'libsvm_svc', 'random_forest', 'logistic_regression', 'mlp'],
             optimizer='smbo',
-            ensemble_method='bagging',
+            cross_valid=False,
+            ensemble_method='ensemble_selection',
             ensemble_size=args.ensemble_size,
         )
         cls.fit(dm, metric='auc', runcount=args.run_count)

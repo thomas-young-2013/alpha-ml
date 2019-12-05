@@ -2,7 +2,6 @@ import numpy as np
 import math
 
 from sklearn.linear_model import LogisticRegression
-from lightgbm.sklearn import LGBMClassifier
 
 from alphaml.utils.metrics_util import get_metric
 
@@ -78,11 +77,6 @@ class AutoCross:
             pred = model.predict(valid_x)
 
         return metric(pred, valid_y)
-
-    def _get_lgb_perf(self, train_label, valid_label):
-
-        return self._get_performance(self.train_data, train_label, self.valid_data, valid_label,
-                                     LGBMClassifier())
 
     # def _greedy_search(self, x_train, x_valid, y_train, y_valid):
     #     feature_num = x_train.shape[1]

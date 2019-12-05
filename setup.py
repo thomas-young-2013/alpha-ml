@@ -1,14 +1,8 @@
 from setuptools import setup, find_packages
 
-requirements = ['numpy==1.16.4',
-'six==1.11.0',
-'scipy==1.3.0',
-'pandas==0.23.0',
-'scikit-learn==0.21.3',
-'tqdm==4.34.0',
-'hyperopt==0.1.2',
-'ConfigSpace==0.4.11',
-'smac==0.11.1']
+with open('requirements.txt') as fp:
+    install_reqs = [r.rstrip() for r in fp.readlines()
+                    if not r.startswith('#') and not r.startswith('git+')]
 
 setup(name='alphaml',
       version='0.1.0',
@@ -17,8 +11,9 @@ setup(name='alphaml',
       author_email='liyang.cs@pku.edu.cn',
       url='https://github.com/thomas-young-2013/',
       keywords='AutoML',
-      packages=find_packages(),
+      packages=find_packages(exclude=['docs', 'examples', 'test']),
       license='LICENSE.txt',
       test_suite='nose.collector',
+      python_requires='>=3.5.*',
       include_package_data=True,
-      install_requires=requirements)
+      install_requires=install_reqs)

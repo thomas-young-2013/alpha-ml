@@ -29,7 +29,6 @@ class AutoML(object):
             optimizer_type,
             seed=42):
         """
-
         :param time_budget: int, total time limit
         :param each_run_budget: int, time limit for each model
         :param memory_limit: int
@@ -188,14 +187,18 @@ class AutoMLClassifier(AutoML):
                  include_models,
                  exclude_models,
                  optimizer_type,
+                 cross_valid,
+                 k_fold,
                  seed=None):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
                          exclude_models, optimizer_type, seed)
         # Define evaluator for classification
         if optimizer_type == 'smbo':
-            self.evaluator = BaseClassificationEvaluator(optimizer='smac')
+            self.evaluator = BaseClassificationEvaluator(optimizer='smac',
+                                                         kfold=k_fold if cross_valid else None)
         elif optimizer_type == 'tpe':
-            self.evaluator = BaseClassificationEvaluator(optimizer='tpe')
+            self.evaluator = BaseClassificationEvaluator(optimizer='tpe',
+                                                         kfold=k_fold if cross_valid else None)
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)
@@ -211,14 +214,18 @@ class AutoMLRegressor(AutoML):
                  include_models,
                  exclude_models,
                  optimizer_type,
+                 cross_valid,
+                 k_fold,
                  seed=None):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
                          exclude_models, optimizer_type, seed)
         # Define evaluator for regression
         if optimizer_type == 'smbo':
-            self.evaluator = BaseRegressionEvaluator(optimizer='smac')
+            self.evaluator = BaseRegressionEvaluator(optimizer='smac',
+                                                     kfold=k_fold if cross_valid else None)
         elif optimizer_type == 'tpe':
-            self.evaluator = BaseRegressionEvaluator(optimizer='tpe')
+            self.evaluator = BaseRegressionEvaluator(optimizer='tpe',
+                                                     kfold=k_fold if cross_valid else None)
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)
