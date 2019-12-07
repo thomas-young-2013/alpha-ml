@@ -28,7 +28,7 @@ class EnsembleSelection(BaseEnsembleModel):
             predictions = []
             for i, config in enumerate(self.config_list):
                 if self.model_info[1][i] == FAILED:
-                    print("Failed")
+                    self.logger.info("Failed!")
                     continue
                 try:
                     estimator = self.get_estimator(config, train_X, train_y)

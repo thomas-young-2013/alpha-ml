@@ -40,7 +40,7 @@ def test_cash_module():
             include_models=['liblinear_svc', 'libsvm_svc', 'random_forest', 'logistic_regression', 'mlp'],
             optimizer='smbo',
             cross_valid=False,
-            ensemble_method='ensemble_selection',
+            ensemble_method='bagging',
             ensemble_size=args.ensemble_size,
         )
         cls.fit(dm, metric='auc', runcount=args.run_count)

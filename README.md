@@ -14,7 +14,7 @@ Alpha-ML is compatible with: __Python 3.6__.
 ------------------
 
 
-## Guiding principles
+# Guiding principles
 
 - __User friendliness.__ Alpha-ML needs few human assistance.
 
@@ -23,7 +23,28 @@ Alpha-ML is compatible with: __Python 3.6__.
 - __Work with Python__. No separate models configuration files in a declarative format. Models are described in Python code, which is compact, easier to debug, and allows for ease of extensibility.
 
 ------------------
+# Installation
 
+Please install all dependencies manually with:
+
+```curl https://github.com/thomas-young-2013/alpha-ml/blob/master/requirements.txt | xargs -n 1 -L 1 pip install```
+
+Then install alpha-ml:
+
+```python setup.py install```
+
+Besides the listed requirements (see `requirements.txt`), the random forest
+used in SMAC3 requires SWIG (>= 3.0).
+
+```apt-get install build-essential swig gfortran```
+
+------------------
+
+# Examples
+
+See examples/
+  * 
+------------------
 
 ## Development
 

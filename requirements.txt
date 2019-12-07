@@ -1,11 +1,13 @@
+numpy
+scipy<1.8.0
+pandas<0.24.0
+cython
+
 tqdm
 nose
-hyperopt==0.1.2
 
-smac==0.8.0
-pynisher==0.5.0
-#pyrfr==0.8.0
-ConfigSpace<=0.4.11
+dill
+hyperopt==0.1.2
 
 lockfile
 pyyaml
@@ -14,9 +16,11 @@ psutil
 sobol_seq
 joblib
 
+pynisher==0.5.0
+pyrfr==0.8.0
+ConfigSpace<=0.4.11
+
+smac==0.8.0
 xgboost
 scikit-learn<0.22
 
-scipy<1.8.0
-pandas<0.24.0
-numpy
