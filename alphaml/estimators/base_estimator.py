@@ -53,6 +53,8 @@ class BaseEstimator(object):
         self.pre_pipeline = None
         self._ml_engine = None
 
+        if self.ensemble_size == 'ensemble_selection' and self.cross_valid == True:
+            raise ValueError("Ensemble selection can not work with cv.")
         # Delete the temporary model files.
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)

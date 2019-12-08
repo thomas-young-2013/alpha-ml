@@ -6,13 +6,14 @@ from sklearn.model_selection import StratifiedKFold, KFold
 
 class Stacking(BaseEnsembleModel):
     def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', meta_learner='xgboost',
-                 kfold=3, random_state=None):
+                 kfold=3, save_dir=None, random_state=None):
         super().__init__(model_info=model_info,
                          ensemble_size=ensemble_size,
                          task_type=task_type,
                          metric=metric,
                          evaluator=evaluator,
                          model_type=model_type,
+                         save_dir=save_dir,
                          random_state=random_state)
 
         self.kfold = kfold

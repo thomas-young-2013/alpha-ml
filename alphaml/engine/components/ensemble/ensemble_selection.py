@@ -8,13 +8,15 @@ from sklearn.model_selection import train_test_split
 # EnsembleSelection cannot be used with a k-fold evaluator
 class EnsembleSelection(BaseEnsembleModel):
     def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', mode='fast',
-                 sorted_initialization=False, n_best=20, random_state=None):
+                 sorted_initialization=False, n_best=20, save_dir=None, random_state=None):
         super().__init__(model_info=model_info,
                          ensemble_size=ensemble_size,
                          task_type=task_type,
                          metric=metric,
                          evaluator=evaluator,
                          model_type=model_type,
+                         save_dir=save_dir,
+                         if_show=False,
                          random_state=random_state)
         self.sorted_initialization = sorted_initialization
         self.config_list = self.model_info[0]  # Get the original config list
@@ -34,17 +36,18 @@ class EnsembleSelection(BaseEnsembleModel):
             predictions = []
             for i, config in enumerate(self.config_list):
                 if self.model_info[1][i] == FAILED:
-                    self.logger.info("Failed!")
+                    self.logger.info("Estimator failed!")
                     continue
                 try:
                     estimator = self.get_estimator(config, train_X, train_y, if_load=True)
-                    self.ensemble_models.append(estimator)
                     pred = self.get_proba_predictions(estimator, val_X)
+                    self.ensemble_models.append(estimator)
                     predictions.append(pred)
 
                 except ValueError as err:
                     pass
             self._fit(predictions, val_y)
+            # TODO: refit the models
         elif self.model_type == 'dl':
             pass
 

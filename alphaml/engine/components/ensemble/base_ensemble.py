@@ -12,7 +12,7 @@ class BaseEnsembleModel(object):
     """Base class for model ensemble"""
 
     def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', threshold=0.2,
-                 random_state=None):
+                 save_dir=None, if_show=True, random_state=None):
         """
 
         :param model_info: tuple of lists recording configurations and their performance
@@ -22,6 +22,8 @@ class BaseEnsembleModel(object):
         :param evaluator: Evaluator
         :param model_type: str
         :param threshold: float, threshold to obsolete candidates
+        :param save_dir: str, path to load models
+        :param if_show: bool, print ensemble candidates
         :param random_state: int
         """
         self.model_info = model_info
@@ -31,6 +33,7 @@ class BaseEnsembleModel(object):
         self.ensemble_models = list()
         self.threshold = threshold
         self.logger = logging.getLogger()
+        self.save_dir = save_dir
         self.seed = random_state
 
         if task_type in ['binary', 'multiclass', 'img_binary', 'img_multiclass', 'img_multilabel-indicator']:
@@ -94,12 +97,13 @@ class BaseEnsembleModel(object):
         self.config_list = []
         for i in index_list:
             if abs((best_performance - self.model_info[1][i]) / best_performance) < self.threshold:
-                self.logger.info('------------------')
                 self.config_list.append(self.model_info[0][i])
-                self.logger.info(str(self.model_info[0][i]))
-                self.logger.info("Valid performance: " + str(self.model_info[1][i]))
-                self.get_estimator(self.model_info[0][i], None, None, if_show=True)
-                self.logger.info('------------------')
+                if if_show:
+                    self.logger.info('------------------')
+                    self.logger.info(str(self.model_info[0][i]))
+                    self.logger.info("Valid performance: " + str(self.model_info[1][i]))
+                    self.get_estimator(self.model_info[0][i], None, None, if_show=True)
+                    self.logger.info('------------------')
 
     def fit(self, dm):
         raise NotImplementedError
@@ -121,7 +125,7 @@ class BaseEnsembleModel(object):
         :param if_show: bool
         :return: sklearn model
         """
-        save_path = kwargs['save_path']
+        save_path = os.path.join(self.save_dir, kwargs['save_path'])
         if if_show:
             self.logger.info("Estimator path: " + save_path)
             return None
@@ -130,11 +134,12 @@ class BaseEnsembleModel(object):
                 estimator = pkl.load(f)
                 self.logger.info("Estimator loaded from " + save_path)
 
-        _, estimator = self.evaluator.set_config(config, self.evaluator.optimizer)
-        estimator.fit(x, y)
-        with open(save_path, 'wb') as f:
-            pkl.dump(estimator, f)
-            self.logger.info("Estimator retrained!")
+        else:
+            _, estimator = self.evaluator.set_config(config, self.evaluator.optimizer)
+            estimator.fit(x, y)
+            with open(save_path, 'wb') as f:
+                pkl.dump(estimator, f)
+                self.logger.info("Estimator retrained!")
         return estimator
 
     def get_proba_predictions(self, estimator, X):

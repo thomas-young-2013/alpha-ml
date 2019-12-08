@@ -5,13 +5,15 @@ from functools import reduce
 
 
 class Bagging(BaseEnsembleModel):
-    def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', random_state=None):
+    def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', save_dir=None,
+                 random_state=None):
         super().__init__(model_info=model_info,
                          ensemble_size=ensemble_size,
                          task_type=task_type,
                          metric=metric,
                          evaluator=evaluator,
                          model_type=model_type,
+                         save_dir=save_dir,
                          random_state=random_state)
 
     def fit(self, dm: DataManager):

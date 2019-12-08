@@ -115,16 +115,17 @@ class AutoML(object):
         else:
             if self.ensemble_method == 'bagging':
                 self.ensemble_model = Bagging(model_infos, self.ensemble_size, task_type, self.metric, self.evaluator,
-                                              random_state=self.seed)
+                                              save_dir=self.save_dir, random_state=self.seed)
             elif self.ensemble_method == 'blending':
                 self.ensemble_model = Blending(model_infos, self.ensemble_size, task_type, self.metric, self.evaluator,
-                                               random_state=self.seed)
+                                               save_dir=self.save_dir, random_state=self.seed)
             elif self.ensemble_method == 'stacking':
                 self.ensemble_model = Stacking(model_infos, self.ensemble_size, task_type, self.metric, self.evaluator,
-                                               random_state=self.seed)
+                                               save_dir=self.save_dir, random_state=self.seed)
             elif self.ensemble_method == 'ensemble_selection':
                 self.ensemble_model = EnsembleSelection(model_infos, self.ensemble_size, task_type, self.metric,
-                                                        self.evaluator, n_best=20, random_state=self.seed)
+                                                        self.evaluator, save_dir=self.save_dir,
+                                                        random_state=self.seed)
             else:
                 raise ValueError('UNSUPPORTED ensemble method: %s' % self.ensemble_method)
 

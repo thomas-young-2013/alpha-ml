@@ -119,7 +119,6 @@ class BaseClassificationEvaluator(object):
                 metric = self.metric_func(val_y, y_pred)
             except ValueError:
                 return -FAILED
-
             self.logger.info(
                 '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (classifier_type, 1 - metric, time.time() - start_time))
             # Turn it to a minimization problem.
@@ -153,6 +152,7 @@ class BaseClassificationEvaluator(object):
                         y_pred = estimator.predict(val_X)
                         metric += self.metric_func(val_y, y_pred) / self.kfold
                 except ValueError:
+                    self.logger.info("<Fit Model> failed!")
                     return -FAILED
 
             self.logger.info('<FIT MODEL> finished!')
@@ -313,6 +313,7 @@ class BaseRegressionEvaluator(object):
                 y_pred = estimator.predict(val_X)
                 metric = self.metric_func(val_y, y_pred)
             except ValueError:
+                self.logger.info("<Fit Model> failed!")
                 return -FAILED
 
             self.logger.info(
