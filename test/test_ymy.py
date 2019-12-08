@@ -42,6 +42,7 @@ def test_cash_module():
             cross_valid=False,
             ensemble_method='bagging',
             ensemble_size=args.ensemble_size,
+            save_dir='data/save_models'
         )
         cls.fit(dm, metric='auc', runcount=args.run_count)
 
@@ -55,7 +56,6 @@ def test_cash_module():
             y_test.append(int(sheet.cell_value(i, 0)))
 
         pred = cls.predict_proba(X_test)
-        print(pred)
         result.append(roc_auc_score(y_test, pred[:, 1:2]))
         print(result)
 

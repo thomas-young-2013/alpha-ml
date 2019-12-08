@@ -49,7 +49,7 @@ def get_tpe_config(config):
 class BaseClassificationEvaluator(object):
     """ A class to evaluate configurations for classification"""
 
-    def __init__(self, optimizer='smac', val_size=0.33, kfold=None):
+    def __init__(self, optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models'):
         """
         :param optimizer: Algorithm for hyper-parameter tuning
         :param val_size: float from (0,1), used if kfold is None
@@ -60,9 +60,10 @@ class BaseClassificationEvaluator(object):
         self.kfold = kfold
         self.data_manager = None
         self.metric_func = None
+        self.save_dir = save_dir
         self.logger = logging.getLogger(__name__)
 
-    @save_ease(save_dir='./data/save_models')
+    @save_ease(None)
     def __call__(self, config, **kwargs):
         """
         Get the performance of a given configuration
@@ -72,7 +73,7 @@ class BaseClassificationEvaluator(object):
         # Build the corresponding estimator.
         classifier_type, estimator = self.set_config(config, self.optimizer)
 
-        save_path = kwargs['save_path']
+        save_path = os.path.join(self.save_dir, kwargs['save_path'])
         # TODO: how to parallelize.
         if hasattr(estimator, 'n_jobs'):
             setattr(estimator, 'n_jobs', multiprocessing.cpu_count() - 1)
@@ -191,7 +192,7 @@ class BaseClassificationEvaluator(object):
             estimator.set_hyperparameters(config)
             return classifier_type, estimator
 
-    @save_ease(save_dir='data/save_models')
+    @save_ease()
     def fit(self, config, **kwargs):
         """
         Build and fit an sklearn classifier
@@ -199,7 +200,7 @@ class BaseClassificationEvaluator(object):
         :return: self
         """
         # Build the corresponding estimator.
-        save_path = kwargs['save_path']
+        save_path = os.path.join(self.save_dir, kwargs['save_path'])
         _, estimator = self.set_config(config, self.optimizer)
         # Fit the estimator on the training data.
         estimator.fit(self.data_manager.train_X, self.data_manager.train_y)
@@ -209,7 +210,7 @@ class BaseClassificationEvaluator(object):
         return self
 
     # Do not remove config
-    @save_ease(save_dir='data/save_models')
+    @save_ease(None)
     def predict(self, config, test_X=None, **kwargs):
         """
         Load an sklearn classifier and predict classes for X.
@@ -217,7 +218,7 @@ class BaseClassificationEvaluator(object):
         :param test_X: Array-like or sparse matrix of shape = [n_samples, n_features]
         :return: y_pred: Array of shape = [n_samples]
         """
-        save_path = kwargs['save_path']
+        save_path = os.path.join(self.save_dir, kwargs['save_path'])
         assert os.path.exists(save_path)
         with open(save_path, 'rb') as f:
             estimator = pkl.load(f)
@@ -230,7 +231,7 @@ class BaseClassificationEvaluator(object):
         y_pred = estimator.predict(test_X)
         return y_pred
 
-    @save_ease(save_dir='data/save_models')
+    @save_ease(None)
     def predict_proba(self, config, test_X=None, **kwargs):
         """
         Load an sklearn classifier and predict probabilities of classes for all samples X.
@@ -238,7 +239,7 @@ class BaseClassificationEvaluator(object):
         :param test_X: Array-like or sparse matrix of shape = [n_samples, n_features]
         :return: y_pred : Array of shape = [n_samples, n_classes]
         """
-        save_path = kwargs['save_path']
+        save_path = os.path.join(self.save_dir, kwargs['save_path'])
         assert os.path.exists(save_path)
         with open(save_path, 'rb') as f:
             estimator = pkl.load(f)
@@ -255,20 +256,22 @@ class BaseClassificationEvaluator(object):
 class BaseRegressionEvaluator(object):
     """ A class to evaluate configurations for classification"""
 
-    def __init__(self, optimizer='smac', val_size=0.33, kfold=None):
+    def __init__(self, optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models'):
         """
         :param optimizer: algorithm for hyper-parameter tuning
         :param val_size: float from (0,1), used if kfold is None
         :param kfold: int larger than 2
+        :param save_dir: str, path to save models
         """
         self.optimizer = optimizer
         self.val_size = val_size
         self.kfold = kfold
         self.data_manager = None
         self.metric_func = None
+        self.save_dir = save_dir
         self.logger = logging.getLogger(__name__)
 
-    @save_ease(save_dir='./data/save_models')
+    @save_ease(None)
     def __call__(self, config, **kwargs):
         """
         Get the performance of a given configuration
@@ -277,7 +280,7 @@ class BaseRegressionEvaluator(object):
         """
         # Build the corresponding estimator.
         regressor_type, estimator = self.set_config(config, self.optimizer)
-        save_path = kwargs['save_path']
+        save_path = os.path.join(self.save_dir, kwargs['save_path'])
         # TODO: how to parallelize.
         if hasattr(estimator, 'n_jobs'):
             setattr(estimator, 'n_jobs', multiprocessing.cpu_count() - 1)
@@ -376,7 +379,7 @@ class BaseRegressionEvaluator(object):
             estimator.set_hyperparameters(config)
             return regressor_type, estimator
 
-    @save_ease(save_dir='data/save_models')
+    @save_ease(None)
     def fit(self, config, **kwargs):
         """
         Build and fit an sklearn regressor
@@ -384,7 +387,7 @@ class BaseRegressionEvaluator(object):
         :return: self
         """
         # Build the corresponding estimator.
-        save_path = kwargs['save_path']
+        save_path = os.path.join(self.save_dir, kwargs['save_path'])
         _, estimator = self.set_config(config, self.optimizer)
         # Fit the estimator on the training data.
         estimator.fit(self.data_manager.train_X, self.data_manager.train_y)
@@ -394,7 +397,7 @@ class BaseRegressionEvaluator(object):
         return self
 
     # Do not remove config
-    @save_ease(save_dir='data/save_models')
+    @save_ease(None)
     def predict(self, config, test_X=None, **kwargs):
         """
         Load an sklearn regressor and make predictions for X.
@@ -402,7 +405,7 @@ class BaseRegressionEvaluator(object):
         :param test_X: Array-like or sparse matrix of shape = [n_samples, n_features]
         :return: y_pred: Array of shape = [n_samples]
         """
-        save_path = kwargs['save_path']
+        save_path = os.path.join(self.save_dir, kwargs['save_path'])
         assert os.path.exists(save_path)
         with open(save_path, 'rb') as f:
             estimator = pkl.load(f)

@@ -3,18 +3,7 @@ import hashlib
 import os
 
 
-def save_ease(*dargs, **dkargs):
-    # get model dir.
-    # deal with the parameters in decorators.
-    if 'save_dir' not in dkargs:
-        save_dir = './data/save_models'
-    else:
-        save_dir = dkargs['save_dir']
-    if not save_dir.endswith('/'):
-        save_dir += '/'
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
+def save_ease(*args,**kwargs):
     # if 'estimator_name' not in dkargs:
     #     name = 'default_model'
     # else:
@@ -26,7 +15,7 @@ def save_ease(*dargs, **dkargs):
             config = args[1]
             config = deepcopy(config)
             config_id = get_configuration_id(config)
-            save_path = save_dir + "%s.pkl" % config_id
+            save_path = "%s.pkl" % config_id
             # deal with the parameters in the function decorated.
             kwargs['save_path'] = save_path
             result = func(*args, **kwargs)

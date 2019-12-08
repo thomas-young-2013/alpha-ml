@@ -1,3 +1,4 @@
+# TODO: Scorer
 def get_metric(metricstr):
     # Metrics for classification
     if metricstr in ["accuracy", "acc"]:

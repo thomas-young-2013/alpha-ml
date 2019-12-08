@@ -11,7 +11,8 @@ import logging
 class BaseEnsembleModel(object):
     """Base class for model ensemble"""
 
-    def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', threshold=0.2):
+    def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', threshold=0.2,
+                 random_state=None):
         """
 
         :param model_info: tuple of lists recording configurations and their performance
@@ -21,6 +22,7 @@ class BaseEnsembleModel(object):
         :param evaluator: Evaluator
         :param model_type: str
         :param threshold: float, threshold to obsolete candidates
+        :param random_state: int
         """
         self.model_info = model_info
         self.model_type = model_type
@@ -29,6 +31,7 @@ class BaseEnsembleModel(object):
         self.ensemble_models = list()
         self.threshold = threshold
         self.logger = logging.getLogger()
+        self.seed = random_state
 
         if task_type in ['binary', 'multiclass', 'img_binary', 'img_multiclass', 'img_multilabel-indicator']:
             self.task_type = CLASSIFICATION
@@ -107,7 +110,7 @@ class BaseEnsembleModel(object):
     def predict_each(self, X):
         raise NotImplementedError
 
-    @save_ease(save_dir='./data/save_models')
+    @save_ease(None)
     def get_estimator(self, config, x, y, if_load=False, if_show=False, **kwargs):
         """
         Build a sklearn estimator and fit it with training data

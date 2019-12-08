@@ -8,8 +8,14 @@ from sklearn.model_selection import train_test_split
 # EnsembleSelection cannot be used with a k-fold evaluator
 class EnsembleSelection(BaseEnsembleModel):
     def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', mode='fast',
-                 sorted_initialization=False, n_best=20):
-        super().__init__(model_info, ensemble_size, task_type, metric, evaluator, model_type)
+                 sorted_initialization=False, n_best=20, random_state=None):
+        super().__init__(model_info=model_info,
+                         ensemble_size=ensemble_size,
+                         task_type=task_type,
+                         metric=metric,
+                         evaluator=evaluator,
+                         model_type=model_type,
+                         random_state=random_state)
         self.sorted_initialization = sorted_initialization
         self.config_list = self.model_info[0]  # Get the original config list
         if n_best < self.ensemble_size:
@@ -21,8 +27,8 @@ class EnsembleSelection(BaseEnsembleModel):
 
     def fit(self, dm: DataManager):
         data_X, data_y = dm.train_X, dm.train_y
-        # TODO: Specify random_state and test_size (the same size in evaluator)
-        train_X, val_X, train_y, val_y = train_test_split(data_X, data_y, test_size=0.7, random_state=42)
+        # TODO: Specify test_size (the same size in evaluator)
+        train_X, val_X, train_y, val_y = train_test_split(data_X, data_y, test_size=0.33, random_state=self.seed)
         # Load the basic models on this training set and make predictions.
         if self.model_type == 'ml':
             predictions = []

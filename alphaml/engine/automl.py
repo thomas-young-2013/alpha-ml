@@ -23,6 +23,7 @@ class AutoML(object):
             include_models,
             exclude_models,
             optimizer_type,
+            save_dir=None,
             seed=42):
         """
         :param time_budget: int, total time limit
@@ -33,6 +34,7 @@ class AutoML(object):
         :param include_models: list, names of models included.
         :param exclude_models: list, names of models excluded.
         :param optimizer_type: str, algorithm hyper-parameter optimization
+        :param save_dir: str, path to save models
         :param seed: int, random seed
         """
         self.time_budget = time_budget
@@ -44,7 +46,7 @@ class AutoML(object):
         self.exclude_models = exclude_models
         self.component_manager = ComponentsManager()
         self.optimizer_type = optimizer_type
-
+        self.save_dir = save_dir
         self.seed = seed
         self.optimizer = None
         self.evaluator = None
@@ -106,21 +108,23 @@ class AutoML(object):
         else:
             raise ValueError('UNSUPPORTED optimizer: %s' % self.optimizer)
         self.optimizer.run()
-
         # Construct the ensemble model according to the ensemble method.
         model_infos = (self.optimizer.configs_list, self.optimizer.config_values)
         if self.ensemble_method == 'none':
             self.ensemble_model = None
         else:
             if self.ensemble_method == 'bagging':
-                self.ensemble_model = Bagging(model_infos, self.ensemble_size, task_type, self.metric, self.evaluator)
+                self.ensemble_model = Bagging(model_infos, self.ensemble_size, task_type, self.metric, self.evaluator,
+                                              random_state=self.seed)
             elif self.ensemble_method == 'blending':
-                self.ensemble_model = Blending(model_infos, self.ensemble_size, task_type, self.metric, self.evaluator)
+                self.ensemble_model = Blending(model_infos, self.ensemble_size, task_type, self.metric, self.evaluator,
+                                               random_state=self.seed)
             elif self.ensemble_method == 'stacking':
-                self.ensemble_model = Stacking(model_infos, self.ensemble_size, task_type, self.metric, self.evaluator)
+                self.ensemble_model = Stacking(model_infos, self.ensemble_size, task_type, self.metric, self.evaluator,
+                                               random_state=self.seed)
             elif self.ensemble_method == 'ensemble_selection':
                 self.ensemble_model = EnsembleSelection(model_infos, self.ensemble_size, task_type, self.metric,
-                                                        self.evaluator, n_best=20)
+                                                        self.evaluator, n_best=20, random_state=self.seed)
             else:
                 raise ValueError('UNSUPPORTED ensemble method: %s' % self.ensemble_method)
 
@@ -188,16 +192,19 @@ class AutoMLClassifier(AutoML):
                  optimizer_type,
                  cross_valid,
                  k_fold,
+                 save_dir=None,
                  seed=None):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
-                         exclude_models, optimizer_type, seed)
+                         exclude_models, optimizer_type, save_dir, seed)
         # Define evaluator for classification
         if optimizer_type == 'smbo':
             self.evaluator = BaseClassificationEvaluator(optimizer='smac',
-                                                         kfold=k_fold if cross_valid else None)
+                                                         kfold=k_fold if cross_valid else None,
+                                                         save_dir=save_dir)
         elif optimizer_type == 'tpe':
             self.evaluator = BaseClassificationEvaluator(optimizer='tpe',
-                                                         kfold=k_fold if cross_valid else None)
+                                                         kfold=k_fold if cross_valid else None,
+                                                         save_dir=save_dir)
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)
@@ -215,16 +222,19 @@ class AutoMLRegressor(AutoML):
                  optimizer_type,
                  cross_valid,
                  k_fold,
+                 save_dir=None,
                  seed=None):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
-                         exclude_models, optimizer_type, seed)
+                         exclude_models, optimizer_type, save_dir, seed)
         # Define evaluator for regression
         if optimizer_type == 'smbo':
             self.evaluator = BaseRegressionEvaluator(optimizer='smac',
-                                                     kfold=k_fold if cross_valid else None)
+                                                     kfold=k_fold if cross_valid else None,
+                                                     save_dir=save_dir)
         elif optimizer_type == 'tpe':
             self.evaluator = BaseRegressionEvaluator(optimizer='tpe',
-                                                     kfold=k_fold if cross_valid else None)
+                                                     kfold=k_fold if cross_valid else None,
+                                                     save_dir=save_dir)
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)
@@ -239,9 +249,10 @@ class AutoIMGClassifier(AutoML):
                  include_models,
                  exclude_models,
                  optimizer_type,
+                 save_dir=None,
                  seed=None):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_size, include_models,
-                         exclude_models, optimizer_type, seed)
+                         exclude_models, optimizer_type, save_dir, seed)
 
         self.evaluator = None
         self.map_dict = None

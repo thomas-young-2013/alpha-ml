@@ -5,8 +5,14 @@ from functools import reduce
 
 
 class Bagging(BaseEnsembleModel):
-    def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml'):
-        super().__init__(model_info, ensemble_size, task_type, metric, evaluator, model_type)
+    def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', random_state=None):
+        super().__init__(model_info=model_info,
+                         ensemble_size=ensemble_size,
+                         task_type=task_type,
+                         metric=metric,
+                         evaluator=evaluator,
+                         model_type=model_type,
+                         random_state=random_state)
 
     def fit(self, dm: DataManager):
         # Train the basic models on this training set.

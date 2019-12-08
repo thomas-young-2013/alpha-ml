@@ -19,7 +19,7 @@ class BaseEstimator(object):
             seed=None,
             include_models=None,
             exclude_models=None,
-            tmp_dir='./data/save_models',
+            save_dir='./data/save_models',
             output_dir=None):
         """
 
@@ -34,7 +34,7 @@ class BaseEstimator(object):
         :param seed: int, random seed
         :param include_models: list, names of models included.
         :param exclude_models: list, names of models excluded.
-        :param tmp_dir: str, path to save models
+        :param save_dir: str, path to save models
         :param output_dir: str
         """
         self.optimizer_type = optimizer
@@ -48,16 +48,18 @@ class BaseEstimator(object):
         self.cross_valid = cross_valid
         self.k_fold = k_fold
         self.seed = seed
-        self.tmp_dir = tmp_dir
+        self.save_dir = save_dir
         self.output_dir = output_dir
         self.pre_pipeline = None
         self._ml_engine = None
 
         # Delete the temporary model files.
-        self.tmp_dir = tmp_dir
-        ls = os.listdir(self.tmp_dir)
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        self.save_dir = save_dir
+        ls = os.listdir(self.save_dir)
         for item in ls:
-            c_path = os.path.join(self.tmp_dir, item)
+            c_path = os.path.join(self.save_dir, item)
             if os.path.isfile(c_path):
                 os.remove(c_path)
 
@@ -74,6 +76,7 @@ class BaseEstimator(object):
             optimizer_type=self.optimizer_type,
             cross_valid=self.cross_valid,
             k_fold=self.k_fold,
+            save_dir=self.save_dir,
             seed=self.seed
         )
         return engine
