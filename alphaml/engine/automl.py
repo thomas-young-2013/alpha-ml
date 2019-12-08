@@ -2,10 +2,6 @@ import logging
 from alphaml.engine.components.components_manager import ComponentsManager
 from alphaml.engine.components.data_manager import DataManager
 from alphaml.engine.evaluator.base import BaseClassificationEvaluator, BaseRegressionEvaluator
-from alphaml.engine.optimizer.smac_smbo import SMAC_SMBO
-from alphaml.engine.optimizer.monotone_mab_optimizer import MONO_MAB_SMBO
-from alphaml.engine.optimizer.monotone_mab_tpe_optimizer import MONO_MAB_TPE_SMBO
-from alphaml.engine.optimizer.tpe_smbo import TPE_SMBO
 from alphaml.engine.components.ensemble.bagging import Bagging
 from alphaml.engine.components.ensemble.blending import Blending
 from alphaml.engine.components.ensemble.stacking import Stacking
@@ -75,6 +71,7 @@ class AutoML(object):
         # Conduct model selection and hyper-parameter optimization.
         if self.optimizer_type == 'smbo':
             # Generate the configuration space for the automl task.
+            from alphaml.engine.optimizer.smac_smbo import SMAC_SMBO
             config_space = self.component_manager.get_hyperparameter_search_space(task_type,
                                                                                   include=self.include_models,
                                                                                   exclude=self.exclude_models,
@@ -83,6 +80,7 @@ class AutoML(object):
             self.optimizer = SMAC_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
         elif self.optimizer_type == 'mono_smbo':
             # Generate the configuration space for the automl task.
+            from alphaml.engine.optimizer.monotone_mab_optimizer import MONO_MAB_SMBO
             config_space = self.component_manager.get_hyperparameter_search_space(task_type,
                                                                                   include=self.include_models,
                                                                                   exclude=self.exclude_models,
@@ -91,6 +89,7 @@ class AutoML(object):
             self.optimizer = MONO_MAB_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
         elif self.optimizer_type == 'tpe':
             # Generate the configuration space for the automl task.
+            from alphaml.engine.optimizer.tpe_smbo import TPE_SMBO
             config_space = self.component_manager.get_hyperparameter_search_space(task_type,
                                                                                   include=self.include_models,
                                                                                   exclude=self.exclude_models,
@@ -98,6 +97,7 @@ class AutoML(object):
             self.optimizer = TPE_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
         elif self.optimizer_type == 'mono_tpe_smbo':
             # Generate the configuration space for the automl task.
+            from alphaml.engine.optimizer.monotone_mab_tpe_optimizer import MONO_MAB_TPE_SMBO
             config_space = self.component_manager.get_hyperparameter_search_space(task_type,
                                                                                   include=self.include_models,
                                                                                   exclude=self.exclude_models,
@@ -127,7 +127,8 @@ class AutoML(object):
         if self.ensemble_model is not None:
             # Train the ensemble model.
             self.ensemble_model.fit(data)
-
+        else:
+            self.evaluator.fit(self.optimizer.incumbent)
         return self
 
     def predict(self, X, **kwargs):
@@ -138,8 +139,6 @@ class AutoML(object):
         :return: pred: array of shape = [n_samples]
         """
         if self.ensemble_model is None:
-
-            self.evaluator.fit(self.optimizer.incumbent)
             pred = self.evaluator.predict(self.optimizer.incumbent, X)
             return pred
         else:

@@ -31,7 +31,7 @@ class EnsembleSelection(BaseEnsembleModel):
                     self.logger.info("Failed!")
                     continue
                 try:
-                    estimator = self.get_estimator(config, train_X, train_y)
+                    estimator = self.get_estimator(config, train_X, train_y, if_load=True)
                     self.ensemble_models.append(estimator)
                     pred = self.get_proba_predictions(estimator, val_X)
                     predictions.append(pred)

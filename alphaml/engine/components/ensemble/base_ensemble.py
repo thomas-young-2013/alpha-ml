@@ -108,12 +108,13 @@ class BaseEnsembleModel(object):
         raise NotImplementedError
 
     @save_ease(save_dir='./data/save_models')
-    def get_estimator(self, config, x, y, if_show=False, **kwargs):
+    def get_estimator(self, config, x, y, if_load=False, if_show=False, **kwargs):
         """
         Build a sklearn estimator and fit it with training data
         :param config: A configuration
         :param x: Array-like or sparse matrix of shape = [n_samples, n_features]
         :param y: Array of shape = [n_samples] or [n_samples, n_classes]
+        :param if_load: bool
         :param if_show: bool
         :return: sklearn model
         """
@@ -121,6 +122,11 @@ class BaseEnsembleModel(object):
         if if_show:
             self.logger.info("Estimator path: " + save_path)
             return None
+        if if_load and os.path.exists(save_path):
+            with open(save_path, 'rb') as f:
+                estimator = pkl.load(f)
+                self.logger.info("Estimator loaded from " + save_path)
+
         _, estimator = self.evaluator.set_config(config, self.evaluator.optimizer)
         estimator.fit(x, y)
         with open(save_path, 'wb') as f:

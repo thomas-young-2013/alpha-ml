@@ -53,7 +53,7 @@ class BaseClassificationEvaluator(object):
         """
         :param optimizer: Algorithm for hyper-parameter tuning
         :param val_size: float from (0,1), used if kfold is None
-        :param kfold: int or float from (0,1)
+        :param kfold: int larger than 2
         """
         self.optimizer = optimizer
         self.val_size = val_size
@@ -108,10 +108,13 @@ class BaseClassificationEvaluator(object):
             # In case of failed estimator
             try:
                 # Validate it on val data.
-                y_pred = estimator.predict_proba(val_X)
+
                 if self.metric_func == roc_auc_score:
+                    y_pred = estimator.predict_proba(val_X)
                     if len(val_y.shape) == 1:
                         val_y = encoder.transform(np.reshape(val_y, (len(val_y), 1))).toarray()
+                else:
+                    y_pred = estimator.predict(val_X)
                 metric = self.metric_func(val_y, y_pred)
             except ValueError:
                 return -FAILED
@@ -140,11 +143,14 @@ class BaseClassificationEvaluator(object):
                 # In case of failed estimator
                 try:
                     # Validate it on val data.
-                    y_pred = estimator.predict_proba(val_X)
                     if self.metric_func == roc_auc_score:
+                        y_pred = estimator.predict_proba(val_X)
                         if len(val_y.shape) == 1:
                             val_y = encoder.transform(np.reshape(val_y, (len(val_y), 1))).toarray()
-                    metric += self.metric_func(val_y, y_pred) / self.kfold
+                        metric += self.metric_func(val_y, y_pred) / self.kfold
+                    else:
+                        y_pred = estimator.predict(val_X)
+                        metric += self.metric_func(val_y, y_pred) / self.kfold
                 except ValueError:
                     return -FAILED
 
@@ -253,7 +259,7 @@ class BaseRegressionEvaluator(object):
         """
         :param optimizer: algorithm for hyper-parameter tuning
         :param val_size: float from (0,1), used if kfold is None
-        :param kfold: int or float from (0,1)
+        :param kfold: int larger than 2
         """
         self.optimizer = optimizer
         self.val_size = val_size
