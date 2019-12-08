@@ -27,7 +27,9 @@ Alpha-ML is compatible with: __Python 3.6__.
 
 Please install all dependencies manually with:
 
-```curl https://github.com/thomas-young-2013/alpha-ml/blob/master/requirements.txt | xargs -n 1 -L 1 pip install```
+<!--```curl https://github.com/thomas-young-2013/alpha-ml/blob/master/requirements.txt | xargs -n 1 -L 1 pip install```
+-->
+```pip install -r requirements.txt```
 
 Then install alpha-ml:
 
