@@ -12,7 +12,7 @@ from sklearn.preprocessing import OneHotEncoder
 from alphaml.engine.components.models.classification import _classifiers
 from alphaml.engine.components.models.regression import _regressors
 from alphaml.utils.save_ease import save_ease
-from alphaml.utils.constants import FAILED
+from alphaml.utils.constants import *
 
 
 def get_smac_config(config):
@@ -49,11 +49,13 @@ def get_tpe_config(config):
 class BaseClassificationEvaluator(object):
     """ A class to evaluate configurations for classification"""
 
-    def __init__(self, optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models'):
+    def __init__(self, optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models', random_state=None):
         """
         :param optimizer: Algorithm for hyper-parameter tuning
         :param val_size: float from (0,1), used if kfold is None
         :param kfold: int larger than 2
+        :param save_dir: str, path to save and load models
+        :param random_state: int
         """
         self.optimizer = optimizer
         self.val_size = val_size
@@ -61,6 +63,7 @@ class BaseClassificationEvaluator(object):
         self.data_manager = None
         self.metric_func = None
         self.save_dir = save_dir
+        self.seed = random_state
         self.logger = logging.getLogger(__name__)
 
     @save_ease(None)
@@ -97,7 +100,7 @@ class BaseClassificationEvaluator(object):
             train_X, val_X, train_y, val_y = train_test_split(data_X, data_y,
                                                               test_size=self.val_size,
                                                               stratify=data_y,
-                                                              random_state=42)
+                                                              random_state=self.seed)
 
             # Fit the estimator on the training data.
             estimator.fit(train_X, train_y)
@@ -109,7 +112,6 @@ class BaseClassificationEvaluator(object):
             # In case of failed estimator
             try:
                 # Validate it on val data.
-
                 if self.metric_func == roc_auc_score:
                     y_pred = estimator.predict_proba(val_X)
                     if len(val_y.shape) == 1:
@@ -118,12 +120,8 @@ class BaseClassificationEvaluator(object):
                     y_pred = estimator.predict(val_X)
                 metric = self.metric_func(val_y, y_pred)
             except ValueError:
-                return -FAILED
-            self.logger.info(
-                '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (classifier_type, 1 - metric, time.time() - start_time))
-            # Turn it to a minimization problem.
-            return 1 - metric
-
+                self.logger.info("<Fit Model> failed!")
+                return FAILED
         else:
             kfold = StratifiedKFold(n_splits=self.kfold, shuffle=True)
             metric = 0
@@ -153,13 +151,12 @@ class BaseClassificationEvaluator(object):
                         metric += self.metric_func(val_y, y_pred) / self.kfold
                 except ValueError:
                     self.logger.info("<Fit Model> failed!")
-                    return -FAILED
+                    return FAILED
 
-            self.logger.info('<FIT MODEL> finished!')
-            self.logger.info(
-                '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (classifier_type, 1 - metric, time.time() - start_time))
-            # Turn it to a minimization problem.
-            return 1 - metric
+        self.logger.info(
+            '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (classifier_type, metric, time.time() - start_time))
+        # Turn it to a minimization problem.
+        return - metric
 
     def set_config(self, config, optimizer):
         """
@@ -256,12 +253,13 @@ class BaseClassificationEvaluator(object):
 class BaseRegressionEvaluator(object):
     """ A class to evaluate configurations for classification"""
 
-    def __init__(self, optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models'):
+    def __init__(self, optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models', random_state=None):
         """
         :param optimizer: algorithm for hyper-parameter tuning
         :param val_size: float from (0,1), used if kfold is None
         :param kfold: int larger than 2
-        :param save_dir: str, path to save models
+        :param save_dir: str, path to save and load models
+        :param random_state: int
         """
         self.optimizer = optimizer
         self.val_size = val_size
@@ -269,6 +267,7 @@ class BaseRegressionEvaluator(object):
         self.data_manager = None
         self.metric_func = None
         self.save_dir = save_dir
+        self.seed = random_state
         self.logger = logging.getLogger(__name__)
 
     @save_ease(None)
@@ -298,7 +297,8 @@ class BaseRegressionEvaluator(object):
         if not self.kfold:
             # Split data
             # TODO: Specify random_state
-            train_X, val_X, train_y, val_y = train_test_split(data_X, data_y, test_size=self.val_size, random_state=42)
+            train_X, val_X, train_y, val_y = train_test_split(data_X, data_y, test_size=self.val_size,
+                                                              random_state=self.seed)
 
             # Fit the estimator on the training data.
             estimator.fit(train_X, train_y)
@@ -314,11 +314,7 @@ class BaseRegressionEvaluator(object):
                 metric = self.metric_func(val_y, y_pred)
             except ValueError:
                 self.logger.info("<Fit Model> failed!")
-                return -FAILED
-
-            self.logger.info(
-                '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (regressor_type, metric, time.time() - start_time))
-            return metric
+                return FAILED
         else:
             kfold = KFold(n_splits=self.kfold, shuffle=True)
             metric = 0
@@ -341,12 +337,12 @@ class BaseRegressionEvaluator(object):
                     y_pred = estimator.predict(val_X)
                     metric += self.metric_func(val_y, y_pred) / self.kfold
                 except ValueError:
-                    return -FAILED
+                    self.logger.info("<Fit Model> failed!")
+                    return FAILED
 
-            self.logger.info('<FIT MODEL> finished!')
-            self.logger.info(
-                '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (regressor_type, metric, time.time() - start_time))
-            return metric
+        self.logger.info(
+            '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (regressor_type, metric, time.time() - start_time))
+        return metric
 
     def set_config(self, config, optimizer):
         """

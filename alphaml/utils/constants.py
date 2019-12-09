@@ -30,7 +30,8 @@ UNSIGNED_DATA = 10
 """Constants used in Integer.
 """
 MAX_INT = 999999999
-FAILED = -2147483646.0
+# Classification uses - metric, Regression uses metric
+FAILED = 2147483647.0
 
 """Constants used in feature engineering
 """

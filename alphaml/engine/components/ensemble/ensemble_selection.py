@@ -1,5 +1,6 @@
 from alphaml.engine.components.ensemble.base_ensemble import *
 from alphaml.engine.components.data_manager import DataManager
+from alphaml.engine.evaluator.base import BaseClassificationEvaluator
 import numpy as np
 from collections import Counter
 from sklearn.model_selection import train_test_split
@@ -26,28 +27,44 @@ class EnsembleSelection(BaseEnsembleModel):
             self.n_best = self.ensemble_size
         self.mode = mode
         self.random_state = np.random.RandomState(42)
+        self.weights_ = None
 
     def fit(self, dm: DataManager):
         data_X, data_y = dm.train_X, dm.train_y
-        # TODO: Specify test_size (the same size in evaluator)
-        train_X, val_X, train_y, val_y = train_test_split(data_X, data_y, test_size=0.33, random_state=self.seed)
+        if isinstance(self.evaluator, BaseClassificationEvaluator):
+            train_X, val_X, train_y, val_y = train_test_split(data_X, data_y, test_size=self.evaluator.val_size,
+                                                              stratify=data_y,
+                                                              random_state=self.seed)
+        else:
+            train_X, val_X, train_y, val_y = train_test_split(data_X, data_y, test_size=self.evaluator.val_size,
+                                                              random_state=self.seed)
         # Load the basic models on this training set and make predictions.
         if self.model_type == 'ml':
             predictions = []
+            configs = []
             for i, config in enumerate(self.config_list):
-                if self.model_info[1][i] == FAILED:
+                if self.model_info[1][i] == -FAILED:
                     self.logger.info("Estimator failed!")
                     continue
                 try:
                     estimator = self.get_estimator(config, train_X, train_y, if_load=True)
                     pred = self.get_proba_predictions(estimator, val_X)
+                    configs.append(config)
                     self.ensemble_models.append(estimator)
                     predictions.append(pred)
 
                 except ValueError as err:
                     pass
             self._fit(predictions, val_y)
-            # TODO: refit the models
+            # Refit the models and update weights
+            weights_ = []
+            self.ensemble_models = []
+            for i, weight in enumerate(self.weights_):
+                if weight != 0:
+                    weights_.append(weight)
+                    self.ensemble_models.append(self.get_estimator(configs[i], data_X, data_y, if_show=True))
+            self.weights_ = weights_.copy()
+
         elif self.model_type == 'dl':
             pass
 

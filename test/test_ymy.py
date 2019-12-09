@@ -37,11 +37,11 @@ def test_cash_module():
 
         dm = DataManager(X_train, y_train)
         cls = Classifier(
-            # include_models=['liblinear_svc', 'libsvm_svc', 'random_forest', 'logistic_regression', 'mlp'],
-            include_models=['mlp'],
+            include_models=['liblinear_svc', 'libsvm_svc', 'random_forest', 'logistic_regression', 'mlp'],
+            #include_models=['mlp'],
             optimizer='smbo',
             cross_valid=False,
-            ensemble_method='ensemble_selection',
+            ensemble_method='bagging',
             ensemble_size=args.ensemble_size,
             save_dir='data/save_models'
         )

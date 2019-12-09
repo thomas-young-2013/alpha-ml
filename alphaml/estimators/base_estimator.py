@@ -16,7 +16,7 @@ class BaseEstimator(object):
             cross_valid=True,
             k_fold=3,
             memory_limit=1024,
-            seed=None,
+            seed=42,
             include_models=None,
             exclude_models=None,
             save_dir='./data/save_models',

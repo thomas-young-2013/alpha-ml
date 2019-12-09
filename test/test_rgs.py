@@ -33,12 +33,12 @@ def test_cash_module():
         cls = Regressor(exclude_models=['xgboost','mlp'],
                         #include_models=['mlp'],
                         optimizer='tpe',
-                        ensemble_method='blending',
+                        cross_valid=False,
+                        ensemble_method='bagging',
                         ensemble_size=args.ensemble_size,
                         ).fit(dm, metric='mse', update_mode=2, runcount=args.run_count)
 
         pred = cls.predict(test_x)
-        print(pred)
         result.append(mean_squared_error(test_y, pred))
         print(result)
 

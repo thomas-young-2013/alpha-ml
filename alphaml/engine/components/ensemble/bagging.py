@@ -20,14 +20,13 @@ class Bagging(BaseEnsembleModel):
         # Train the basic models on this training set.
         if self.model_type == 'ml':
             for config in self.config_list:
-                estimator = self.get_estimator(config, dm.train_X, dm.train_y)
+                estimator = self.get_estimator(config, dm.train_X, dm.train_y, if_show=True)
                 self.ensemble_models.append(estimator)
         elif self.model_type == 'dl':
             pass
         return self
 
     def predict(self, X):
-        # Predict the labels via voting results from the basic models.
         model_pred_list = []
         final_pred = []
         # Get predictions from each model

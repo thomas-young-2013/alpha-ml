@@ -38,7 +38,7 @@ class TPE_SMBO(BaseOptimizer):
 
         for trial in self.trials.trials:
             config = trial['result']['config']
-            perf = 1 - trial['result']['loss']
+            perf = - trial['result']['loss']
             time_taken = trial['book_time'].replace(tzinfo=timezone.utc).astimezone(
                 tz=None).timestamp() - self.start_time
             self.configs_list.append(config)
@@ -51,7 +51,7 @@ class TPE_SMBO(BaseOptimizer):
             self.incumbent = self.configs_list[id]
 
             self.logger.info('TPE ==> The time points: %s' % self.timing_list)
-            self.logger.info('TPE ==> The best performance found: %f' % max(self.config_values))
+            self.logger.info('TPE ==> The best performance found: %f' % abs(max(self.config_values)))
             self.logger.info('TPE ==> The best HP found: %s' % self.incumbent)
 
             # Save the experimental results.

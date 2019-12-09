@@ -201,11 +201,13 @@ class AutoMLClassifier(AutoML):
         if optimizer_type == 'smbo':
             self.evaluator = BaseClassificationEvaluator(optimizer='smac',
                                                          kfold=k_fold if cross_valid else None,
-                                                         save_dir=save_dir)
+                                                         save_dir=save_dir,
+                                                         random_state=seed)
         elif optimizer_type == 'tpe':
             self.evaluator = BaseClassificationEvaluator(optimizer='tpe',
                                                          kfold=k_fold if cross_valid else None,
-                                                         save_dir=save_dir)
+                                                         save_dir=save_dir,
+                                                         random_state=seed)
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)
@@ -231,11 +233,13 @@ class AutoMLRegressor(AutoML):
         if optimizer_type == 'smbo':
             self.evaluator = BaseRegressionEvaluator(optimizer='smac',
                                                      kfold=k_fold if cross_valid else None,
-                                                     save_dir=save_dir)
+                                                     save_dir=save_dir,
+                                                     random_state=seed)
         elif optimizer_type == 'tpe':
             self.evaluator = BaseRegressionEvaluator(optimizer='tpe',
                                                      kfold=k_fold if cross_valid else None,
-                                                     save_dir=save_dir)
+                                                     save_dir=save_dir,
+                                                     random_state=seed)
 
     def fit(self, data, **kwargs):
         return super().fit(data, **kwargs)

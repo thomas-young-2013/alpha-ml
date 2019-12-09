@@ -24,6 +24,15 @@ Alpha-ML is compatible with: __Python 3.6__.
 
 ------------------
 # Installation
+AlphaML requires Python3.
+
+Besides the listed requirements (see `requirements.txt`), the random forest
+used in SMAC3 requires SWIG (>= 3.0).
+
+```
+apt-get remove swig
+apt-get install build-essential libpcre3-dev swig3.0 gfortran
+```
 
 Please install all dependencies manually with:
 
@@ -34,11 +43,6 @@ Please install all dependencies manually with:
 Then install alpha-ml:
 
 ```python setup.py install```
-
-Besides the listed requirements (see `requirements.txt`), the random forest
-used in SMAC3 requires SWIG (>= 3.0).
-
-```apt-get install build-essential swig gfortran```
 
 ------------------
 

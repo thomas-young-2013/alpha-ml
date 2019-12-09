@@ -71,7 +71,7 @@ class BaseEnsembleModel(object):
                 id_list = []
                 for i in range(model_len):
                     if self.model_info[0][i]['estimator'] == estimator:
-                        if self.model_info[1][i] != FAILED:
+                        if self.model_info[1][i] != -FAILED:
                             if best_performance < self.model_info[1][i]:
                                 best_performance = self.model_info[1][i]
                             id_list.append(i)
@@ -86,7 +86,7 @@ class BaseEnsembleModel(object):
                 id_list = []
                 for i in range(model_len):
                     if self.model_info[0][i]['estimator'][0] == estimator:
-                        if self.model_info[1][i] != FAILED:
+                        if self.model_info[1][i] != -FAILED:
                             if best_performance < self.model_info[1][i]:
                                 best_performance = self.model_info[1][i]
                             id_list.append(i)
@@ -98,12 +98,6 @@ class BaseEnsembleModel(object):
         for i in index_list:
             if abs((best_performance - self.model_info[1][i]) / best_performance) < self.threshold:
                 self.config_list.append(self.model_info[0][i])
-                if if_show:
-                    self.logger.info('------------------')
-                    self.logger.info(str(self.model_info[0][i]))
-                    self.logger.info("Valid performance: " + str(self.model_info[1][i]))
-                    self.get_estimator(self.model_info[0][i], None, None, if_show=True)
-                    self.logger.info('------------------')
 
     def fit(self, dm):
         raise NotImplementedError
@@ -122,24 +116,24 @@ class BaseEnsembleModel(object):
         :param x: Array-like or sparse matrix of shape = [n_samples, n_features]
         :param y: Array of shape = [n_samples] or [n_samples, n_classes]
         :param if_load: bool
-        :param if_show: bool
         :return: sklearn model
         """
         save_path = os.path.join(self.save_dir, kwargs['save_path'])
-        if if_show:
-            self.logger.info("Estimator path: " + save_path)
-            return None
         if if_load and os.path.exists(save_path):
             with open(save_path, 'rb') as f:
                 estimator = pkl.load(f)
-                self.logger.info("Estimator loaded from " + save_path)
+                # self.logger.info("Estimator loaded from " + save_path)
 
         else:
             _, estimator = self.evaluator.set_config(config, self.evaluator.optimizer)
             estimator.fit(x, y)
             with open(save_path, 'wb') as f:
                 pkl.dump(estimator, f)
-                self.logger.info("Estimator retrained!")
+                if if_show:
+                    self.logger.info('--------Base Model Info Start---------')
+                    self.logger.info(str(config))
+                    self.logger.info("Estimator retrained and saved in " + save_path)
+                    self.logger.info('--------Base Model Info End----------')
         return estimator
 
     def get_proba_predictions(self, estimator, X):

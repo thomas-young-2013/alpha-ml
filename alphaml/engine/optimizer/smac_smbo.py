@@ -47,7 +47,7 @@ class SMAC_SMBO(BaseOptimizer):
         # Fetch the results.
         runkeys = list(runhistory.data.keys())
         for key in runkeys:
-            reward = 1 - runhistory.data[key][0]
+            reward = - runhistory.data[key][0]
             self.configs_list.append(runhistory.ids_config[key[0]])
             self.config_values.append(reward)
 
@@ -63,7 +63,7 @@ class SMAC_SMBO(BaseOptimizer):
         self.logger.info('SMAC smbo ==> the size of evaluations: %d' % len(self.configs_list))
         if len(self.configs_list) > 0:
             self.logger.info('SMAC smbo ==> The time points: %s' % self.timing_list)
-            self.logger.info('SMAC smbo ==> The best performance found: %f' % max(self.config_values))
+            self.logger.info('SMAC smbo ==> The best performance found: %f' % abs(max(self.config_values)))
             self.logger.info('SMAC smbo ==> The best HP found: %s' % self.incumbent)
 
             # Save the experimental results.

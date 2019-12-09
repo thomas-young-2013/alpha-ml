@@ -157,7 +157,7 @@ class MONO_MAB_SMBO(BaseOptimizer):
                     p.append(acc_reward[-1])
                     q.append(acc_reward[-1])
             self.logger.info('PQ estimate: %s' % dict(zip(arm_set, [[qt, pt] for qt, pt in zip(q, p)])))
-            self.logger.info('Iteration %d, the best reward found is %f' % (iter_num, max(self.config_values)))
+            self.logger.info('Iteration %d, the best reward found is %f' % (iter_num, abs(max(self.config_values))))
 
             # Remove some arm.
             N = len(arm_set)
@@ -189,7 +189,7 @@ class MONO_MAB_SMBO(BaseOptimizer):
         if len(self.configs_list) > 0:
             id = np.argmax(self.config_values)
             self.logger.info('MONO_BAI smbo ==> The time points: %s' % self.timing_list)
-            self.logger.info('MONO_BAI smbo ==> The best performance found: %f' % self.config_values[id])
+            self.logger.info('MONO_BAI smbo ==> The best performance found: %f' % abs(self.config_values[id]))
             self.logger.info('MONO_BAI smbo ==> The best HP found: %s' % self.configs_list[id])
             self.incumbent = self.configs_list[id]
 

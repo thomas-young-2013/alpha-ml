@@ -46,7 +46,7 @@ class Blending(BaseEnsembleModel):
         if self.model_type == 'ml':
             # Train basic models using a part of training data
             for i, config in enumerate(self.config_list):
-                estimator = self.get_estimator(config, x_p1, y_p1)
+                estimator = self.get_estimator(config, x_p1, y_p1,)
                 self.ensemble_models.append(estimator)
                 pred = self.get_proba_predictions(estimator, x_p2)
                 if self.task_type == CLASSIFICATION:
