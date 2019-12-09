@@ -71,7 +71,7 @@ class AutoML(object):
 
         self.logger.debug('The optimizer type is: %s' % self.optimizer_type)
         # Conduct model selection and hyper-parameter optimization.
-        if self.optimizer_type == 'smbo':
+        if self.optimizer_type == 'smac':
             # Generate the configuration space for the automl task.
             from alphaml.engine.optimizer.smac_smbo import SMAC_SMBO
             config_space = self.component_manager.get_hyperparameter_search_space(task_type,
@@ -106,7 +106,8 @@ class AutoML(object):
                                                                                   optimizer='tpe')
             self.optimizer = MONO_MAB_TPE_SMBO(self.evaluator, config_space, data, self.seed, **kwargs)
         else:
-            raise ValueError('UNSUPPORTED optimizer: %s' % self.optimizer)
+            raise ValueError(
+                'Unsupported Optimizer: %s. Try {smac, tpe, mono_smbo, mono_tpe_smbo}' % self.optimizer_type)
         self.optimizer.run()
         # Construct the ensemble model according to the ensemble method.
         model_infos = (self.optimizer.configs_list, self.optimizer.config_values)
@@ -198,12 +199,12 @@ class AutoMLClassifier(AutoML):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
                          exclude_models, optimizer_type, save_dir, seed)
         # Define evaluator for classification
-        if optimizer_type == 'smbo':
+        if optimizer_type in ['smac', 'mono_smbo']:
             self.evaluator = BaseClassificationEvaluator(optimizer='smac',
                                                          kfold=k_fold if cross_valid else None,
                                                          save_dir=save_dir,
                                                          random_state=seed)
-        elif optimizer_type == 'tpe':
+        elif optimizer_type in ['tpe', 'mono_tpe_smbo']:
             self.evaluator = BaseClassificationEvaluator(optimizer='tpe',
                                                          kfold=k_fold if cross_valid else None,
                                                          save_dir=save_dir,
@@ -230,12 +231,12 @@ class AutoMLRegressor(AutoML):
         super().__init__(time_budget, each_run_budget, memory_limit, ensemble_method, ensemble_size, include_models,
                          exclude_models, optimizer_type, save_dir, seed)
         # Define evaluator for regression
-        if optimizer_type == 'smbo':
+        if optimizer_type in ['smac', 'mono_smbo']:
             self.evaluator = BaseRegressionEvaluator(optimizer='smac',
                                                      kfold=k_fold if cross_valid else None,
                                                      save_dir=save_dir,
                                                      random_state=seed)
-        elif optimizer_type == 'tpe':
+        elif optimizer_type in ['tpe', 'mono_tpe_smbo']:
             self.evaluator = BaseRegressionEvaluator(optimizer='tpe',
                                                      kfold=k_fold if cross_valid else None,
                                                      save_dir=save_dir,

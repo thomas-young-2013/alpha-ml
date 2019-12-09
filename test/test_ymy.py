@@ -39,7 +39,7 @@ def test_cash_module():
         cls = Classifier(
             include_models=['liblinear_svc', 'libsvm_svc', 'random_forest', 'logistic_regression', 'mlp'],
             #include_models=['mlp'],
-            optimizer='smbo',
+            optimizer='mono_smbo',
             cross_valid=False,
             ensemble_method='bagging',
             ensemble_size=args.ensemble_size,
