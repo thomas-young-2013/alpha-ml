@@ -27,5 +27,6 @@ examples/img/*
 smac3*/
 
 data/*
+tmp
 *.log
 
