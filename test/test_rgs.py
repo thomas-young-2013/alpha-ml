@@ -1,6 +1,5 @@
 import sys
 import os
-import argparse
 import warnings
 
 alphaml_path = os.getcwd()
@@ -12,10 +11,6 @@ from sklearn.metrics import mean_squared_error
 from alphaml.engine.components.data_manager import DataManager
 from alphaml.estimators.regressor import Regressor
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--run_count', type=int, default=30)
-parser.add_argument('--ensemble_size', type=int, default=30)
-args = parser.parse_args()
 warnings.filterwarnings("ignore")
 
 
@@ -25,7 +20,7 @@ def test_best():
     dm = DataManager(train_x, train_y)
 
     clf = Regressor(
-        optimizer='smac',
+        optimizer='tpe',
         cross_valid=False,
         save_dir='data/save_models'
     )
@@ -41,9 +36,9 @@ def test_cv():
     dm = DataManager(train_x, train_y)
 
     clf = Regressor(
-        optimizer='smac',
+        optimizer='tpe',
         cross_valid=True,
-        k_fold=5,
+        k_fold=3,
         save_dir='data/save_models'
     )
     clf.fit(dm, metric='mse', runcount=30)
