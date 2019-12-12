@@ -29,12 +29,17 @@ AlphaML requires Python3.
 Besides the listed requirements (see `requirements.txt`), the random forest
 used in SMAC3 requires SWIG (>= 3.0).
 
+For Linux,
 ```
-apt-get remove swig
-apt-get install build-essential libpcre3-dev swig3.0 gfortran
+apt-get install build-essential libpcre3-dev swig3.0
+```
+For Conda,
+```
+conda install gxx_linux-64 gcc_linux-64 swig
+
 ```
 
-Please install all dependencies manually with:
+Install all dependencies manually with:
 
 <!--```curl https://github.com/thomas-young-2013/alpha-ml/blob/master/requirements.txt | xargs -n 1 -L 1 pip install```
 -->
@@ -55,5 +60,3 @@ See examples/
 ## Development
 
 - __Travis CI__ TODO.
-- __Nose__ TODO.
-- __Setuptools__ TODO.

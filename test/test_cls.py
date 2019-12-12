@@ -12,10 +12,6 @@ from sklearn.metrics import accuracy_score
 from alphaml.engine.components.data_manager import DataManager
 from alphaml.estimators.classifier import Classifier
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--run_count', type=int, default=30)
-parser.add_argument('--ensemble_size', type=int, default=30)
-args = parser.parse_args()
 warnings.filterwarnings("ignore")
 
 
@@ -29,7 +25,7 @@ def test_best():
         cross_valid=False,
         save_dir='data/save_models'
     )
-    clf.fit(dm, metric='acc', runcount=args.run_count)
+    clf.fit(dm, metric='acc', runcount=30)
 
     pred = clf.predict(test_x)
     print("Test best: %f" % accuracy_score(test_y, pred))
@@ -45,10 +41,10 @@ def test_bagging():
         optimizer='smac',
         cross_valid=False,
         ensemble_method='bagging',
-        ensemble_size=args.ensemble_size,
+        ensemble_size=30,
         save_dir='data/save_models'
     )
-    clf.fit(dm, metric='acc', runcount=args.run_count)
+    clf.fit(dm, metric='acc', runcount=30)
 
     pred = clf.predict(test_x)
     print("Test bagging: %f" % accuracy_score(test_y, pred))
@@ -64,10 +60,10 @@ def test_stacking():
         optimizer='smac',
         cross_valid=False,
         ensemble_method='stacking',
-        ensemble_size=args.ensemble_size,
+        ensemble_size=30,
         save_dir='data/save_models'
     )
-    clf.fit(dm, metric='acc', runcount=args.run_count)
+    clf.fit(dm, metric='acc', runcount=30)
 
     pred = clf.predict(test_x)
     print("Test stacking: %f" % accuracy_score(test_y, pred))
@@ -83,10 +79,10 @@ def test_ensemble_selection():
         optimizer='smac',
         cross_valid=False,
         ensemble_method='ensemble_selection',
-        ensemble_size=args.ensemble_size,
+        ensemble_size=30,
         save_dir='data/save_models'
     )
-    clf.fit(dm, metric='acc', runcount=args.run_count)
+    clf.fit(dm, metric='acc', runcount=30)
 
     pred = clf.predict(test_x)
     print("Test bagging: %f" % accuracy_score(test_y, pred))
@@ -103,7 +99,7 @@ def test_tpe():
         cross_valid=False,
         save_dir='data/save_models'
     )
-    clf.fit(dm, metric='acc', runcount=args.run_count)
+    clf.fit(dm, metric='acc', runcount=30)
 
     pred = clf.predict(test_x)
     print("Test best: %f" % accuracy_score(test_y, pred))
@@ -121,17 +117,8 @@ def test_cv():
         k_fold=3,
         save_dir='data/save_models'
     )
-    clf.fit(dm, metric='acc', runcount=args.run_count)
+    clf.fit(dm, metric='acc', runcount=30)
 
     pred = clf.predict(test_x)
     print("Test best: %f" % accuracy_score(test_y, pred))
     clf.show_info()
-
-
-if __name__ == '__main__':
-    # test_best()
-    # test_bagging()
-    # test_stacking()
-    # test_tpe()
-    # test_cv()
-    test_ensemble_selection()

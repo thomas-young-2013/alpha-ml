@@ -29,7 +29,7 @@ def test_best():
         cross_valid=False,
         save_dir='data/save_models'
     )
-    clf.fit(dm, metric='mse', runcount=args.run_count)
+    clf.fit(dm, metric='mse', runcount=30)
 
     pred = clf.predict(test_x)
     print("Test best: %f" % mean_squared_error(test_y, pred))
@@ -46,12 +46,7 @@ def test_cv():
         k_fold=5,
         save_dir='data/save_models'
     )
-    clf.fit(dm, metric='mse', runcount=args.run_count)
+    clf.fit(dm, metric='mse', runcount=30)
 
     pred = clf.predict(test_x)
     print("Test best: %f" % mean_squared_error(test_y, pred))
-
-
-if __name__ == '__main__':
-    test_best()
-    test_cv()
