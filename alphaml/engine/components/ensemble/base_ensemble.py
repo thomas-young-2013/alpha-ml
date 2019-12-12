@@ -151,3 +151,6 @@ class BaseEnsembleModel(object):
             if len(shape) == 1:
                 pred = pred.reshape((shape[0], 1))
             return pred
+
+    def get_base_config(self):
+        return self.config_list

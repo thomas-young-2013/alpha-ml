@@ -113,6 +113,7 @@ class PassiveAggressive(
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
+
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None, optimizer='smac'):
         if optimizer == 'smac':

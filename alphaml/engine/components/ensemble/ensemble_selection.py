@@ -21,6 +21,7 @@ class EnsembleSelection(BaseEnsembleModel):
                          random_state=random_state)
         self.sorted_initialization = sorted_initialization
         self.config_list = self.model_info[0]  # Get the original config list
+        self.configs = []  # Config list of valid configs
         if n_best < self.ensemble_size:
             self.n_best = n_best
         else:
@@ -41,7 +42,6 @@ class EnsembleSelection(BaseEnsembleModel):
         # Load the basic models on this training set and make predictions.
         if self.model_type == 'ml':
             predictions = []
-            configs = []
             for i, config in enumerate(self.config_list):
                 if self.model_info[1][i] == -FAILED:
                     self.logger.info("Estimator failed!")
@@ -49,7 +49,7 @@ class EnsembleSelection(BaseEnsembleModel):
                 try:
                     estimator = self.get_estimator(config, train_X, train_y, if_load=True)
                     pred = self.get_proba_predictions(estimator, val_X)
-                    configs.append(config)
+                    self.configs.append(config)
                     self.ensemble_models.append(estimator)
                     predictions.append(pred)
 
@@ -62,7 +62,7 @@ class EnsembleSelection(BaseEnsembleModel):
             for i, weight in enumerate(self.weights_):
                 if weight != 0:
                     weights_.append(weight)
-                    self.ensemble_models.append(self.get_estimator(configs[i], data_X, data_y, if_show=True))
+                    self.ensemble_models.append(self.get_estimator(self.configs[i], data_X, data_y, if_show=True))
             self.weights_ = weights_.copy()
 
         elif self.model_type == 'dl':
@@ -257,3 +257,10 @@ class EnsembleSelection(BaseEnsembleModel):
     def predict_proba(self, X):
         pred = self.get_predictions(X)
         return pred
+
+    def get_base_config(self):
+        configs = []
+        for i, weight in enumerate(self.weights_):
+            if weight != 0:
+                configs.append(self.configs[i])
+        return configs

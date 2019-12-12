@@ -181,6 +181,25 @@ class AutoML(object):
         score = self.metric(y, pred_y)
         return score
 
+    def show_info(self):
+        print("--------------AutoML Controller Information Start--------------")
+
+        if self.optimizer_type is None:
+            print("AutoML controller is not fitted yet!")
+            return
+
+        # TODO: AutoFE information
+        print("The HPO algorithm is %s" % self.optimizer_type)
+        print("The ensemble algorithm is %s" % self.ensemble_method)
+        if self.ensemble_model is None:
+            print("The best configuration is %s" % self.optimizer.incumbent)
+        else:
+            configs = self.ensemble_model.get_base_config()
+            for i, config in enumerate(configs):
+                print("Ensemble base %d configuration is %s" % (i, config))
+
+        print("--------------AutoML Controller Information End--------------")
+
 
 class AutoMLClassifier(AutoML):
     def __init__(self,

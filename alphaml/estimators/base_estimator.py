@@ -100,3 +100,6 @@ class BaseEstimator(object):
 
     def get_automl(self):
         raise NotImplementedError()
+
+    def show_info(self):
+        self._ml_engine.show_info()
