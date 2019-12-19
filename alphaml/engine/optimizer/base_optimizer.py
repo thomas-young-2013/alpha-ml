@@ -3,6 +3,7 @@ import logging
 import numpy as np
 from alphaml.engine.evaluator.base import BaseClassificationEvaluator, BaseRegressionEvaluator
 from alphaml.utils.constants import MAX_INT
+from alphaml.utils.logging_utils import get_logger
 
 
 class BaseOptimizer(object):
@@ -27,7 +28,7 @@ class BaseOptimizer(object):
         self.start_time = time.time()
         self.timing_list = list()
         self.incumbent = None
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
         self.logger.info('The random seed is: %d' % self.seed)
 
     def run(self):

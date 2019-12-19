@@ -3,8 +3,7 @@ import os
 import sys
 
 from alphaml.utils import dependencies
-from alphaml.utils.logging_utils import setup_logging
-
+from alphaml.utils.logging_utils import setup_logger
 __version__ = '0.1.0'
 __MANDATORY_PACKAGES__ = '''
 tqdm
@@ -46,4 +45,4 @@ if sys.version_info < (3, 5):
         '3.5 or higher.' % sys.version_info
     )
 
-setup_logging()
+setup_logger()

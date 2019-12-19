@@ -5,7 +5,8 @@ import os
 import pickle as pkl
 import functools
 import math
-import logging
+
+from alphaml.utils.logging_utils import get_logger
 
 
 class BaseEnsembleModel(object):
@@ -32,7 +33,7 @@ class BaseEnsembleModel(object):
         self.evaluator = evaluator
         self.ensemble_models = list()
         self.threshold = threshold
-        self.logger = logging.getLogger()
+        self.logger = get_logger(__name__)
         self.save_dir = save_dir
         self.seed = random_state
 

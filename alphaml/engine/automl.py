@@ -1,13 +1,10 @@
-import logging
 from alphaml.engine.components.components_manager import ComponentsManager
-from alphaml.engine.components.data_manager import DataManager
 from alphaml.engine.evaluator.base import BaseClassificationEvaluator, BaseRegressionEvaluator
 from alphaml.engine.components.ensemble.bagging import Bagging
 from alphaml.engine.components.ensemble.blending import Blending
 from alphaml.engine.components.ensemble.stacking import Stacking
 from alphaml.engine.components.ensemble.ensemble_selection import EnsembleSelection
-from alphaml.utils.label_util import to_categorical, map_label, get_classnum
-import numpy as np
+from alphaml.utils.logging_utils import get_logger
 
 
 class AutoML(object):
@@ -51,7 +48,7 @@ class AutoML(object):
         self.optimizer = None
         self.evaluator = None
         self.metric = None
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
         self.ensemble_model = None
 
     def fit(self, data, **kwargs):

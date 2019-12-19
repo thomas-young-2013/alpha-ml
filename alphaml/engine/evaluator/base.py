@@ -1,10 +1,8 @@
 import time
-import logging
 import multiprocessing
 import pickle as pkl
 import os
 import numpy as np
-from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import OneHotEncoder
@@ -14,6 +12,7 @@ from alphaml.engine.components.models.classification import _classifiers
 from alphaml.engine.components.models.regression import _regressors
 from alphaml.utils.save_ease import save_ease
 from alphaml.utils.constants import *
+from alphaml.utils.logging_utils import get_logger
 
 
 def get_smac_config(config):
@@ -65,7 +64,7 @@ class BaseClassificationEvaluator(object):
         self.scorer = None
         self.save_dir = save_dir
         self.seed = random_state
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
     @save_ease(None)
     def __call__(self, config, **kwargs):
@@ -267,7 +266,7 @@ class BaseRegressionEvaluator(object):
         self.scorer = None
         self.save_dir = save_dir
         self.seed = random_state
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
     @save_ease(None)
     def __call__(self, config, **kwargs):
