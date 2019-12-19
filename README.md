@@ -54,7 +54,8 @@ Then install alpha-ml:
 # Examples
 
 See examples/
-  * 
+  * iris_classification.py - example on how to use mono_smac to make classification on iris dataset
+  * boston_regression.py - example on how to use mono_tpe to make regression on boston dataset
 ------------------
 
 ## Development

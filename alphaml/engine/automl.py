@@ -177,9 +177,8 @@ class AutoML(object):
         :param y: array of shape = [n_samples] or [n_samples, n_labels]
         :return: score: float
         """
-        pred_y = self.predict(X)
-        score = self.metric(y, pred_y)
-        return score
+        score = self.metric(self, X, y)
+        return score * self.metric._sign
 
     def show_info(self):
         print("--------------AutoML Controller Information Start--------------")
