@@ -1,39 +1,50 @@
-# TODO: Scorer
-def get_metric(metricstr):
+from sklearn.metrics.scorer import make_scorer, _BaseScorer
+
+
+def get_metric(metric):
     # Metrics for classification
-    if metricstr in ["accuracy", "acc"]:
+    if metric in ["accuracy", "acc"]:
         from sklearn.metrics import accuracy_score
-        return accuracy_score
-    elif metricstr == 'f1':
+        return make_scorer(accuracy_score)
+    elif metric == 'f1':
         from sklearn.metrics import f1_score
-        return f1_score
-    elif metricstr == 'precision':
+        return make_scorer(f1_score)
+    elif metric == 'precision':
         from sklearn.metrics import precision_score
-        return precision_score
-    elif metricstr == 'recall':
+        return make_scorer(precision_score)
+    elif metric == 'recall':
         from sklearn.metrics import recall_score
-        return recall_score
-    elif metricstr == "auc":
+        return make_scorer(recall_score)
+    elif metric == "auc":
         from sklearn.metrics import roc_auc_score
-        return roc_auc_score
+        return make_scorer(roc_auc_score, needs_threshold=True)
+    elif metric in ['log_loss', 'cross_entropy']:
+        from sklearn.metrics import log_loss
+        return make_scorer(log_loss, greater_is_better=False, needs_proba=True)
 
     # Metrics for regression
-    elif metricstr in ["mean_squared_error", "mse"]:
+    elif metric in ["mean_squared_error", "mse"]:
         from sklearn.metrics import mean_squared_error
-        return mean_squared_error
-    elif metricstr in ['mean_squared_log_error', "msle"]:
+        return make_scorer(mean_squared_error, greater_is_better=False)
+    elif metric in ['mean_squared_log_error', "msle"]:
         from sklearn.metrics import mean_squared_log_error
-        return mean_squared_log_error
-    elif metricstr == "evs":
+        return make_scorer(mean_squared_log_error, greater_is_better=False)
+    elif metric == "evs":
         from sklearn.metrics import explained_variance_score
-        return explained_variance_score
-    elif metricstr == "r2":
+        return make_scorer(explained_variance_score)
+    elif metric == "r2":
         from sklearn.metrics import r2_score
-        return r2_score
-    elif metricstr in ["mean_absolute_error", "mae"]:
+        return make_scorer(r2_score)
+    elif metric == "max_error":
+        from sklearn.metrics import max_error
+        return make_scorer(max_error, greater_is_better=False)
+    elif metric in ["mean_absolute_error", "mae"]:
         from sklearn.metrics import mean_absolute_error
-        return mean_absolute_error
-    elif callable(metricstr):
-        return metricstr
+        return make_scorer(mean_absolute_error, greater_is_better=False)
+    elif metric == "median_absolute_error":
+        from sklearn.metrics import median_absolute_error
+        return make_scorer(median_absolute_error, greater_is_better=False)
+    elif isinstance(metric, _BaseScorer):
+        return metric
     else:
-        raise ValueError("Given", metricstr, ". Expected valid metric string like 'acc' or callable metric function!")
+        raise ValueError("Given", str(metric), ". Expect a sklearn.Scorer instance or implemented metric string")

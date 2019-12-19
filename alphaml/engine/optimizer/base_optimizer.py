@@ -19,7 +19,7 @@ class BaseOptimizer(object):
         assert isinstance(evaluator, (BaseClassificationEvaluator, BaseRegressionEvaluator))
         self.evaluator = evaluator
         self.evaluator.data_manager = data
-        self.evaluator.metric_func = metric
+        self.evaluator.scorer = metric
         self.config_space = config_space
         if seed is None:
             seed = np.random.random_integers(MAX_INT)

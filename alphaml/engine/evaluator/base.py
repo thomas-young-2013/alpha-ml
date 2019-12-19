@@ -8,6 +8,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.metrics.scorer import _ThresholdScorer, _ProbaScorer
 
 from alphaml.engine.components.models.classification import _classifiers
 from alphaml.engine.components.models.regression import _regressors
@@ -61,7 +62,7 @@ class BaseClassificationEvaluator(object):
         self.val_size = val_size
         self.kfold = kfold
         self.data_manager = None
-        self.metric_func = None
+        self.scorer = None
         self.save_dir = save_dir
         self.seed = random_state
         self.logger = logging.getLogger(__name__)
@@ -112,13 +113,12 @@ class BaseClassificationEvaluator(object):
             # In case of failed estimator
             try:
                 # Validate it on val data.
-                if self.metric_func == roc_auc_score:
-                    y_pred = estimator.predict_proba(val_X)
+                if isinstance(self.scorer, (_ThresholdScorer, _ProbaScorer)):
                     if len(val_y.shape) == 1:
                         val_y = encoder.transform(np.reshape(val_y, (len(val_y), 1))).toarray()
+                    metric = self.scorer(estimator, val_X, val_y)
                 else:
-                    y_pred = estimator.predict(val_X)
-                metric = self.metric_func(val_y, y_pred)
+                    metric = self.scorer(estimator, val_X, val_y)
             except ValueError:
                 self.logger.info("<Fit Model> failed!")
                 return FAILED
@@ -141,20 +141,19 @@ class BaseClassificationEvaluator(object):
                 # In case of failed estimator
                 try:
                     # Validate it on val data.
-                    if self.metric_func == roc_auc_score:
-                        y_pred = estimator.predict_proba(val_X)
+                    if isinstance(self.scorer, _ThresholdScorer):
                         if len(val_y.shape) == 1:
                             val_y = encoder.transform(np.reshape(val_y, (len(val_y), 1))).toarray()
-                        metric += self.metric_func(val_y, y_pred) / self.kfold
+                        metric += self.scorer(estimator, val_X, val_y) / self.kfold
                     else:
-                        y_pred = estimator.predict(val_X)
-                        metric += self.metric_func(val_y, y_pred) / self.kfold
+                        metric += self.scorer(estimator, val_X, val_y) / self.kfold
                 except ValueError:
                     self.logger.info("<Fit Model> failed!")
                     return FAILED
 
         self.logger.info(
-            '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (classifier_type, metric, time.time() - start_time))
+            '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (
+                classifier_type, self.scorer._sign * metric, time.time() - start_time))
         # Turn it to a minimization problem.
         return - metric
 
@@ -265,7 +264,7 @@ class BaseRegressionEvaluator(object):
         self.val_size = val_size
         self.kfold = kfold
         self.data_manager = None
-        self.metric_func = None
+        self.scorer = None
         self.save_dir = save_dir
         self.seed = random_state
         self.logger = logging.getLogger(__name__)
@@ -310,8 +309,7 @@ class BaseRegressionEvaluator(object):
             # In case of failed estimator
             try:
                 # Validate it on val data.
-                y_pred = estimator.predict(val_X)
-                metric = self.metric_func(val_y, y_pred)
+                metric = self.scorer(estimator, val_X, val_y)
             except ValueError:
                 self.logger.info("<Fit Model> failed!")
                 return FAILED
@@ -334,15 +332,15 @@ class BaseRegressionEvaluator(object):
                 # In case of failed estimator
                 try:
                     # Validate it on val data.
-                    y_pred = estimator.predict(val_X)
-                    metric += self.metric_func(val_y, y_pred) / self.kfold
+                    metric += self.scorer(estimator, val_X, val_y) / self.kfold
                 except ValueError:
                     self.logger.info("<Fit Model> failed!")
                     return FAILED
 
         self.logger.info(
-            '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (regressor_type, metric, time.time() - start_time))
-        return metric
+            '<EVALUATE %s-%.2f TAKES %.2f SECONDS>' % (
+                regressor_type, self.scorer._sign * metric, time.time() - start_time))
+        return -metric
 
     def set_config(self, config, optimizer):
         """

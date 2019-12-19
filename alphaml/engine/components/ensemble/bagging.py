@@ -56,12 +56,15 @@ class Bagging(BaseEnsembleModel):
         # Predict the labels via voting results from the basic models.
         model_pred_list = []
         final_pred = []
+        num_outputs = None
         # Get predictions from each model
         for model in self.ensemble_models:
             pred = self.get_proba_predictions(model, X)
-            num_outputs = len(pred)
+            if num_outputs is None:
+                num_outputs = len(pred)
             model_pred_list.append(pred)
 
+        assert num_outputs is not None  # Ensemble model contains at least one base model
         # Calculate the average of predictions
         for i in range(num_outputs):
             sample_pred_list = [model_pred[i] for model_pred in model_pred_list]
