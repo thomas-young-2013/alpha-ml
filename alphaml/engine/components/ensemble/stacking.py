@@ -49,7 +49,7 @@ class Stacking(BaseEnsembleModel):
             for i, config in enumerate(self.config_list):
                 for j, (train, test) in enumerate(kf.split(dm.train_X, dm.train_y)):
                     x_p1, x_p2, y_p1, _ = dm.train_X[train], dm.train_X[test], dm.train_y[train], dm.train_y[test]
-                    estimator = self.get_estimator(config, x_p1, y_p1)
+                    estimator = self.get_estimator(self.model_info[0][config], x_p1, y_p1, config)
                     # The final list will contain self.kfold * self.ensemble_size models
                     self.ensemble_models.append(estimator)
                     pred = self.get_proba_predictions(estimator, x_p2)

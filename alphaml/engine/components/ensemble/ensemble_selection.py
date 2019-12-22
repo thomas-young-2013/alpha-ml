@@ -4,6 +4,8 @@ from alphaml.engine.evaluator.base import BaseClassificationEvaluator
 import numpy as np
 from collections import Counter
 from sklearn.model_selection import train_test_split
+from sklearn.metrics.scorer import _ThresholdScorer
+from sklearn.preprocessing import OneHotEncoder
 
 
 # EnsembleSelection cannot be used with a k-fold evaluator
@@ -17,10 +19,9 @@ class EnsembleSelection(BaseEnsembleModel):
                          evaluator=evaluator,
                          model_type=model_type,
                          save_dir=save_dir,
-                         if_show=False,
                          random_state=random_state)
         self.sorted_initialization = sorted_initialization
-        self.config_list = self.model_info[0]  # Get the original config list
+        self.config_list = list(range(len(self.model_info[0])))  # Get the original config list
         self.configs = []  # Config list of valid configs
         if n_best < self.ensemble_size:
             self.n_best = n_best
@@ -29,9 +30,13 @@ class EnsembleSelection(BaseEnsembleModel):
         self.mode = mode
         self.random_state = np.random.RandomState(42)
         self.weights_ = None
+        self.encoder = OneHotEncoder()
 
     def fit(self, dm: DataManager):
         data_X, data_y = dm.train_X, dm.train_y
+        if len(data_y.shape) == 1:
+            reshape_y = np.reshape(data_y, (len(data_y), 1))
+            self.encoder.fit(reshape_y)
         if isinstance(self.evaluator, BaseClassificationEvaluator):
             train_X, val_X, train_y, val_y = train_test_split(data_X, data_y, test_size=self.evaluator.val_size,
                                                               stratify=data_y,
@@ -47,7 +52,7 @@ class EnsembleSelection(BaseEnsembleModel):
                     self.logger.info("Estimator failed!")
                     continue
                 try:
-                    estimator = self.get_estimator(config, train_X, train_y, if_load=True)
+                    estimator = self.get_estimator(self.model_info[0][i], train_X, train_y, config, if_load=True)
                     pred = self.get_proba_predictions(estimator, val_X)
                     self.configs.append(config)
                     self.ensemble_models.append(estimator)
@@ -62,7 +67,9 @@ class EnsembleSelection(BaseEnsembleModel):
             for i, weight in enumerate(self.weights_):
                 if weight != 0:
                     weights_.append(weight)
-                    self.ensemble_models.append(self.get_estimator(self.configs[i], data_X, data_y, if_show=True))
+                    self.ensemble_models.append(
+                        self.get_estimator(self.model_info[0][self.configs[i]], data_X, data_y, self.configs[i],
+                                           if_show=True))
             self.weights_ = weights_.copy()
 
         elif self.model_type == 'dl':
@@ -207,16 +214,10 @@ class EnsembleSelection(BaseEnsembleModel):
         self.weights_ = weights
 
     def calculate_score(self, pred, y_true):
-        if self.task_type == CLASSIFICATION:
-            from sklearn.metrics import roc_auc_score
-            if self.metric == roc_auc_score:
-                pred = pred[:, 1:2]
-            else:
-                pred = np.argmax(pred, axis=1)
-            score = self.metric(y_true, pred)
-        elif self.task_type == REGRESSION:
-            score = -self.metric(y_true, pred)
-        # We want to maximize score
+        if isinstance(self.metric, _ThresholdScorer):
+            if len(y_true.shape) == 1:
+                y_true = self.encoder.transform(np.reshape(y_true, (len(y_true), 1))).toarray()
+        score = self.metric._score_func(y_true, pred) * self.metric._sign
         return score
 
     def get_predictions(self, X):

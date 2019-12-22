@@ -13,7 +13,7 @@ class BaseEnsembleModel(object):
     """Base class for model ensemble"""
 
     def __init__(self, model_info, ensemble_size, task_type, metric, evaluator, model_type='ml', threshold=0.2,
-                 save_dir=None, if_show=True, random_state=None):
+                 save_dir=None, random_state=None):
         """
 
         :param model_info: tuple of lists recording configurations and their performance
@@ -98,7 +98,7 @@ class BaseEnsembleModel(object):
         self.config_list = []
         for i in index_list:
             if abs((best_performance - self.model_info[1][i]) / best_performance) < self.threshold:
-                self.config_list.append(self.model_info[0][i])
+                self.config_list.append(i)
 
     def fit(self, dm):
         raise NotImplementedError
@@ -110,10 +110,12 @@ class BaseEnsembleModel(object):
         raise NotImplementedError
 
     @save_ease(None)
-    def get_estimator(self, config, x, y, if_load=False, if_show=False, **kwargs):
+    def get_estimator(self, config, x, y, config_idx, if_load=False, if_show=False, **kwargs):
         """
         Build a sklearn estimator and fit it with training data
-        :param config: A configuration
+        :param config_idx: int, configuration index
+        :param if_show: bool
+        :param config: configuration
         :param x: Array-like or sparse matrix of shape = [n_samples, n_features]
         :param y: Array of shape = [n_samples] or [n_samples, n_classes]
         :param if_load: bool
@@ -133,6 +135,8 @@ class BaseEnsembleModel(object):
                 if if_show:
                     self.logger.info('--------Base Model Info Start---------')
                     self.logger.info(str(config))
+                    self.logger.info(
+                        "Validation performance (Negative if minmize): " + str(self.model_info[1][config_idx]))
                     self.logger.info("Estimator retrained and saved in " + save_path)
                     self.logger.info('--------Base Model Info End----------')
         return estimator

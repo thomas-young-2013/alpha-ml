@@ -20,7 +20,7 @@ class Bagging(BaseEnsembleModel):
         # Train the basic models on this training set.
         if self.model_type == 'ml':
             for config in self.config_list:
-                estimator = self.get_estimator(config, dm.train_X, dm.train_y, if_show=True)
+                estimator = self.get_estimator(self.model_info[0][config], dm.train_X, dm.train_y, config, if_show=True)
                 self.ensemble_models.append(estimator)
         elif self.model_type == 'dl':
             pass
