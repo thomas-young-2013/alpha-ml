@@ -123,6 +123,7 @@ class LibLinear_SVC(BaseClassificationModel):
                 ForbiddenEqualsClause(loss, "hinge")
             )
             constant_penalty_and_loss = ForbiddenAndConjunction(
+                ForbiddenEqualsClause(dual, "False"),
                 ForbiddenEqualsClause(penalty, "l2"),
                 ForbiddenEqualsClause(loss, "hinge")
             )
@@ -137,6 +138,7 @@ class LibLinear_SVC(BaseClassificationModel):
         elif optimizer == 'tpe':
             space = {'penalty': hp.choice('liblinear_combination',
                                           [{'penalty': "l1", 'loss': "squared_hinge", 'dual': "False"},
+                                           {'penalty': "l2", 'loss': "hinge", 'dual': "True"},
                                            {'penalty': "l2", 'loss': "squared_hinge", 'dual': "True"},
                                            {'penalty': "l2", 'loss': "squared_hinge", 'dual': "False"}]),
                      'loss': None,
