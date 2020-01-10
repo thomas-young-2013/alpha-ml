@@ -21,7 +21,7 @@ def test_best():
     dm = DataManager(train_x, train_y)
 
     clf = Classifier(
-        optimizer='tpe',
+        optimizer='mono_tpe_smbo',
         cross_valid=False,
         save_dir='data/save_models'
     )

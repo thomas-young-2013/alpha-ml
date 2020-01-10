@@ -4,7 +4,7 @@ from alphaml.engine.evaluator.base import BaseClassificationEvaluator
 import numpy as np
 from collections import Counter
 from sklearn.model_selection import train_test_split
-from sklearn.metrics.scorer import _ThresholdScorer
+from sklearn.metrics.scorer import _ThresholdScorer, _PredictScorer
 from sklearn.preprocessing import OneHotEncoder
 
 
@@ -217,6 +217,8 @@ class EnsembleSelection(BaseEnsembleModel):
         if isinstance(self.metric, _ThresholdScorer):
             if len(y_true.shape) == 1:
                 y_true = self.encoder.transform(np.reshape(y_true, (len(y_true), 1))).toarray()
+        elif self.task_type == CLASSIFICATION and isinstance(self.metric, _PredictScorer):
+            pred = np.argmax(pred, axis=-1)
         score = self.metric._score_func(y_true, pred) * self.metric._sign
         return score
 
