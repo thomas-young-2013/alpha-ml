@@ -47,29 +47,35 @@ class EnsembleSelection(BaseEnsembleModel):
         # Load the basic models on this training set and make predictions.
         if self.model_type == 'ml':
             predictions = []
-            for i, config in enumerate(self.config_list):
-                if self.model_info[1][i] == -FAILED:
+            for config in self.config_list:
+                if self.model_info[1][config] == -FAILED:
                     self.logger.info("Estimator failed!")
                     continue
                 try:
-                    estimator = self.get_estimator(self.model_info[0][i], train_X, train_y, config, if_load=True)
+                    estimator = self.get_estimator(self.model_info[0][config], train_X, train_y, config, if_load=True)
                     pred = self.get_proba_predictions(estimator, val_X)
                     self.configs.append(config)
                     self.ensemble_models.append(estimator)
                     predictions.append(pred)
-
                 except ValueError as err:
                     pass
+
             self._fit(predictions, val_y)
             # Refit the models and update weights
             weights_ = []
             self.ensemble_models = []
             for i, weight in enumerate(self.weights_):
                 if weight != 0:
-                    weights_.append(weight)
-                    self.ensemble_models.append(
-                        self.get_estimator(self.model_info[0][self.configs[i]], data_X, data_y, self.configs[i],
-                                           if_show=True))
+                    try:
+                        self.ensemble_models.append(
+                            self.get_estimator(self.model_info[0][self.configs[i]], data_X, data_y, self.configs[i],
+                                               if_show=True))
+                        weights_.append(weight)
+                    except Exception as e:
+                        self.logger.info("Error happened when retraining model.")
+                        self.logger.info(str(self.model_info[0][self.configs[i]]))
+                        self.logger.info(str(e))
+
             self.weights_ = weights_.copy()
 
         elif self.model_type == 'dl':

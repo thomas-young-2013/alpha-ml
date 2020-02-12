@@ -45,9 +45,20 @@ class Blending(BaseEnsembleModel):
         feature_p2 = None
         if self.model_type == 'ml':
             # Train basic models using a part of training data
-            for i, config in enumerate(self.config_list):
-                estimator = self.get_estimator(self.model_info[0][i], x_p1, y_p1, config)
+            for config in self.config_list:
+                estimator = None
+                try:
+                    estimator = self.get_estimator(self.model_info[0][config], x_p1, y_p1, config)
+                except Exception as e:
+                    self.logger.info("Error happened when retraining model.")
+                    self.logger.info(str(self.model_info[0][config]))
+                    self.logger.info(str(e))
+                if estimator is None:
+                    continue
                 self.ensemble_models.append(estimator)
+
+            self.ensemble_size = len(self.ensemble_models)
+            for i, estimator in enumerate(self.ensemble_models):
                 pred = self.get_proba_predictions(estimator, x_p2)
                 if self.task_type == CLASSIFICATION:
                     n_dim = np.array(pred).shape[1]

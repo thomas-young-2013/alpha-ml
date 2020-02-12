@@ -132,13 +132,13 @@ class BaseEnsembleModel(object):
             estimator.fit(x, y)
             with open(save_path, 'wb') as f:
                 pkl.dump(estimator, f)
-                if if_show:
-                    self.logger.info('--------Base Model Info Start---------')
-                    self.logger.info(str(config))
-                    self.logger.info(
-                        "Validation performance (Negative if minimize): " + str(self.model_info[1][config_idx]))
-                    self.logger.info("Estimator retrained and saved in " + save_path)
-                    self.logger.info('--------Base Model Info End----------')
+            if if_show:
+                self.logger.info('--------Base Model Info Start---------')
+                self.logger.info(str(config))
+                self.logger.info(
+                    "Validation performance (Negative if minimize): " + str(self.model_info[1][config_idx]))
+                self.logger.info("Estimator retrained and saved in " + save_path)
+                self.logger.info('--------Base Model Info End----------')
         return estimator
 
     def get_proba_predictions(self, estimator, X):

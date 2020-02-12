@@ -20,8 +20,15 @@ class Bagging(BaseEnsembleModel):
         # Train the basic models on this training set.
         if self.model_type == 'ml':
             for config in self.config_list:
-                estimator = self.get_estimator(self.model_info[0][config], dm.train_X, dm.train_y, config, if_show=True)
-                self.ensemble_models.append(estimator)
+                try:
+                    estimator = self.get_estimator(self.model_info[0][config], dm.train_X, dm.train_y, config,
+                                                   if_show=True)
+                    self.ensemble_models.append(estimator)
+                except Exception as e:
+                    self.logger.info("Error happened when retraining model.")
+                    self.logger.info(str(self.model_info[0][config]))
+                    self.logger.info(str(e))
+
         elif self.model_type == 'dl':
             pass
         return self
