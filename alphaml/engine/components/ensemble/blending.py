@@ -48,7 +48,7 @@ class Blending(BaseEnsembleModel):
             for config in self.config_list:
                 estimator = None
                 try:
-                    estimator = self.get_estimator(self.model_info[0][config], x_p1, y_p1, config)
+                    estimator = self.get_estimator(self.model_info[0][config], x_p1.copy(), y_p1.copy(), config)
                 except Exception as e:
                     self.logger.info("Error happened when retraining model.")
                     self.logger.info(str(self.model_info[0][config]))

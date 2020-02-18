@@ -51,7 +51,7 @@ class Stacking(BaseEnsembleModel):
                     x_p1, x_p2, y_p1, _ = dm.train_X[train], dm.train_X[test], dm.train_y[train], dm.train_y[test]
 
                     # TODO: Try Catch in case of error when retraining models
-                    estimator = self.get_estimator(self.model_info[0][config], x_p1, y_p1, config)
+                    estimator = self.get_estimator(self.model_info[0][config], x_p1.copy(), y_p1.copy(), config)
 
                     # The final list will contain self.kfold * self.ensemble_size models
                     self.ensemble_models.append(estimator)

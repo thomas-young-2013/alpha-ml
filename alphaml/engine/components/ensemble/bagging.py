@@ -21,7 +21,7 @@ class Bagging(BaseEnsembleModel):
         if self.model_type == 'ml':
             for config in self.config_list:
                 try:
-                    estimator = self.get_estimator(self.model_info[0][config], dm.train_X, dm.train_y, config,
+                    estimator = self.get_estimator(self.model_info[0][config], dm.train_X.copy(), dm.train_y.copy(), config,
                                                    if_show=True)
                     self.ensemble_models.append(estimator)
                 except Exception as e:

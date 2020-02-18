@@ -52,7 +52,7 @@ class EnsembleSelection(BaseEnsembleModel):
                     self.logger.info("Estimator failed!")
                     continue
                 try:
-                    estimator = self.get_estimator(self.model_info[0][config], train_X, train_y, config, if_load=True)
+                    estimator = self.get_estimator(self.model_info[0][config], train_X.copy(), train_y.copy(), config, if_load=True)
                     pred = self.get_proba_predictions(estimator, val_X)
                     self.configs.append(config)
                     self.ensemble_models.append(estimator)
@@ -68,7 +68,7 @@ class EnsembleSelection(BaseEnsembleModel):
                 if weight != 0:
                     try:
                         self.ensemble_models.append(
-                            self.get_estimator(self.model_info[0][self.configs[i]], data_X, data_y, self.configs[i],
+                            self.get_estimator(self.model_info[0][self.configs[i]], data_X.copy(), data_y.copy(), self.configs[i],
                                                if_show=True))
                         weights_.append(weight)
                     except Exception as e:
