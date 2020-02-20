@@ -19,7 +19,7 @@ class RandomForest(
     def __init__(self, n_estimators, criterion, max_features,
                  max_depth, min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, bootstrap, max_leaf_nodes,
-                 min_impurity_decrease, random_state=None, n_jobs=1):
+                 min_impurity_decrease, random_state=None, n_jobs=-1):
         self.n_estimators = n_estimators
         self.criterion = criterion
         self.max_features = max_features
