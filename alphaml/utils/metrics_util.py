@@ -46,5 +46,9 @@ def get_metric(metric):
         return make_scorer(median_absolute_error, greater_is_better=False)
     elif isinstance(metric, _BaseScorer):
         return metric
+    elif isinstance(metric, callable):
+        import warnings
+        warnings.warn("metric receives a callable and we consider to maximize it!")
+        return make_scorer(metric)
     else:
-        raise ValueError("Given", str(metric), ". Expect a sklearn.Scorer instance or implemented metric string")
+        raise ValueError("Given", str(metric), ". Expect a str or a sklearn.Scorer or a callable")

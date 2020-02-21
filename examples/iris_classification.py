@@ -1,9 +1,16 @@
 import argparse
 from sklearn.model_selection import train_test_split
+from sklearn.metrics.scorer import make_scorer
 
 from alphaml.estimators.classifier import Classifier
 from alphaml.engine.components.data_manager import DataManager
 from alphaml.datasets.cls_dataset.dataset_loader import load_data
+
+
+def another_acc(y_true, y_pred):
+    from sklearn.metrics import accuracy_score
+    return accuracy_score(y_true, y_pred)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -23,5 +30,9 @@ if __name__ == '__main__':
                      ensemble_method='bagging',
                      ensemble_size=args.ensemble_size,
                      save_dir='data/save_models')
-    clf.fit(dm, metric='acc', runcount=args.run_count)
+
+    # clf.fit(dm, metric='acc', runcount=args.run_count)
+    # Or we can use a user-defined scorer as metric input
+    clf.fit(dm, metric=make_scorer(another_acc, greater_is_better=True), runcount=args.run_count)
+
     print("The accuracy score is: ", clf.score(x_test, y_test))
