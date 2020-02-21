@@ -7,6 +7,7 @@ from alphaml.engine.components.data_manager import DataManager
 from alphaml.datasets.cls_dataset.dataset_loader import load_data
 
 
+
 def another_acc(y_true, y_pred):
     from sklearn.metrics import accuracy_score
     return accuracy_score(y_true, y_pred)
@@ -14,7 +15,7 @@ def another_acc(y_true, y_pred):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--optimizer", type=str, default='smac_mono', help="The optimizer in Alpha-ML.")
+    parser.add_argument("--optimizer", type=str, default='smac', help="The optimizer in Alpha-ML.")
     parser.add_argument("--run_count", type=int, default=200, help="The number of trials to in Alpha-ML.")
     parser.add_argument("--ensemble_size", type=int, default=12,
                         help="The number of base models to ensemble in Alpha-ML.")
