@@ -173,6 +173,7 @@ class BaseClassificationEvaluator(object):
                 estimator = self.estimator
                 classifier_type = None
             config = get_smac_config(config)
+            config['random_state'] = self.seed
             estimator.set_hyperparameters(config)
             return classifier_type, estimator
         elif optimizer == 'tpe':
@@ -184,6 +185,7 @@ class BaseClassificationEvaluator(object):
                 estimator = _classifiers[classifier_type](*[None] * params_num)
             else:
                 estimator = self.estimator
+            config['random_state'] = self.seed
             estimator.set_hyperparameters(config)
             return classifier_type, estimator
 
@@ -358,6 +360,7 @@ class BaseRegressionEvaluator(object):
                 estimator = self.estimator
                 regressor_type = None
             config = get_smac_config(config)
+            config['random_state'] = self.seed
             estimator.set_hyperparameters(config)
             return regressor_type, estimator
         elif optimizer == 'tpe':
@@ -370,6 +373,7 @@ class BaseRegressionEvaluator(object):
                 estimator = _regressors[regressor_type](*[None] * params_num)
             else:
                 estimator = self.estimator
+            config['random_state'] = self.seed
             estimator.set_hyperparameters(config)
             return regressor_type, estimator
 
