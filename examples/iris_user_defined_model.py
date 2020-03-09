@@ -1,14 +1,13 @@
-import argparse
 from sklearn.model_selection import train_test_split
-from sklearn.metrics.scorer import make_scorer
+import numpy as np
+from hyperopt import hp
 
 from alphaml.estimators.classifier import Classifier
 from alphaml.engine.components.data_manager import DataManager
 from alphaml.datasets.cls_dataset.dataset_loader import load_data
 from alphaml.engine.components.models.classification import add_classifier
 
-import numpy as np
-from hyperopt import hp
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
@@ -140,28 +139,20 @@ class UserDefinedDecisionTree(BaseClassificationModel):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--optimizer", type=str, default='smac', help="The optimizer in Alpha-ML.")
-    parser.add_argument("--run_count", type=int, default=200, help="The number of trials to in Alpha-ML.")
-    parser.add_argument("--ensemble_size", type=int, default=12,
-                        help="The number of base models to ensemble in Alpha-ML.")
-    parser.add_argument("--k_fold", type=int, default=3, help="Folds for cross validation in Alpha-ML.")
-    args = parser.parse_args()
-
     x, y, _ = load_data("iris")
     x_train, x_test, y_train, y_test = train_test_split(x, y, stratify=y, test_size=0.2)
     dm = DataManager(x_train, y_train)
     add_classifier(UserDefinedDecisionTree)
 
-    clf = Classifier(optimizer=args.optimizer,
-                     k_fold=args.k_fold,
+    clf = Classifier(optimizer='smac',
+                     k_fold=3,
                      include_models=['UserDefinedDecisionTree'],
                      ensemble_method='bagging',
-                     ensemble_size=args.ensemble_size,
+                     ensemble_size=12,
                      save_dir='data/save_models')
 
     # clf.fit(dm, metric='acc', runcount=args.run_count)
     # Or we can use a user-defined scorer as metric input
-    clf.fit(dm, metric='acc', runcount=args.run_count)
+    clf.fit(dm, metric='acc', runcount=30)
 
     print("The accuracy score is: ", clf.score(x_test, y_test))
