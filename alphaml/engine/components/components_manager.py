@@ -1,17 +1,25 @@
+from collections import OrderedDict
 from ConfigSpace import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 
 class ComponentsManager(object):
+    def __init__(self):
+        self.model_dict = OrderedDict()
+
     def get_hyperparameter_search_space(self, task_type, optimizer='smac', include=None, exclude=None):
         if task_type in ['binary', 'multiclass']:
-            from alphaml.engine.components.models.classification import _classifiers
-            builtin_models = _classifiers.keys()
-            builtin_estimators = _classifiers
+            from alphaml.engine.components.models.classification import _classifiers, _addons
+            self.model_dict.update(_classifiers)
+            self.model_dict.update(_addons.components)
+            builtin_models = self.model_dict.keys()
+            builtin_estimators = self.model_dict.copy()
         elif task_type in ['continuous']:
-            from alphaml.engine.components.models.regression import _regressors
-            builtin_models = _regressors.keys()
-            builtin_estimators = _regressors
+            from alphaml.engine.components.models.regression import _regressors, _addons
+            self.model_dict.update(_regressors)
+            self.model_dict.update(_addons.components)
+            builtin_models = self.model_dict.keys()
+            builtin_estimators = self.model_dict.copy()
         elif task_type in ['img_binary', 'img_multiclass', 'img_multilabel-indicator']:
             from alphaml.engine.components.models.image_classification import _img_classifiers
             builtin_models = _img_classifiers.keys()

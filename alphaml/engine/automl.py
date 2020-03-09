@@ -215,12 +215,14 @@ class AutoMLClassifier(AutoML):
                          exclude_models, optimizer_type, save_dir, seed)
         # Define evaluator for classification
         if optimizer_type in ['smac', 'mono_smbo']:
-            self.evaluator = BaseClassificationEvaluator(optimizer='smac',
+            self.evaluator = BaseClassificationEvaluator(component_manager=self.component_manager,
+                                                         optimizer='smac',
                                                          kfold=k_fold if cross_valid else None,
                                                          save_dir=save_dir,
                                                          random_state=seed)
         elif optimizer_type in ['tpe', 'mono_tpe_smbo']:
-            self.evaluator = BaseClassificationEvaluator(optimizer='tpe',
+            self.evaluator = BaseClassificationEvaluator(component_manager=self.component_manager,
+                                                         optimizer='tpe',
                                                          kfold=k_fold if cross_valid else None,
                                                          save_dir=save_dir,
                                                          random_state=seed)
@@ -247,12 +249,14 @@ class AutoMLRegressor(AutoML):
                          exclude_models, optimizer_type, save_dir, seed)
         # Define evaluator for regression
         if optimizer_type in ['smac', 'mono_smbo']:
-            self.evaluator = BaseRegressionEvaluator(optimizer='smac',
+            self.evaluator = BaseRegressionEvaluator(component_manager=self.component_manager,
+                                                     optimizer='smac',
                                                      kfold=k_fold if cross_valid else None,
                                                      save_dir=save_dir,
                                                      random_state=seed)
         elif optimizer_type in ['tpe', 'mono_tpe_smbo']:
-            self.evaluator = BaseRegressionEvaluator(optimizer='tpe',
+            self.evaluator = BaseRegressionEvaluator(component_manager=self.component_manager,
+                                                     optimizer='tpe',
                                                      kfold=k_fold if cross_valid else None,
                                                      save_dir=save_dir,
                                                      random_state=seed)

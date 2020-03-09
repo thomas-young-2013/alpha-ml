@@ -7,7 +7,6 @@ from alphaml.engine.components.data_manager import DataManager
 from alphaml.datasets.cls_dataset.dataset_loader import load_data
 
 
-
 def another_acc(y_true, y_pred):
     from sklearn.metrics import accuracy_score
     return accuracy_score(y_true, y_pred)
@@ -28,6 +27,7 @@ if __name__ == '__main__':
 
     clf = Classifier(optimizer=args.optimizer,
                      k_fold=args.k_fold,
+                     include_models=['random_forest', 'xgboost', 'libsvm_svc'],
                      ensemble_method='bagging',
                      ensemble_size=args.ensemble_size,
                      save_dir='data/save_models')

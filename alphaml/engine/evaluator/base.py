@@ -8,8 +8,6 @@ from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics.scorer import _ThresholdScorer, _ProbaScorer
 
-from alphaml.engine.components.models.classification import _classifiers
-from alphaml.engine.components.models.regression import _regressors
 from alphaml.utils.save_ease import save_ease
 from alphaml.utils.constants import *
 from alphaml.utils.logging_utils import get_logger
@@ -49,7 +47,8 @@ def get_tpe_config(config):
 class BaseClassificationEvaluator(object):
     """ A class to evaluate configurations for classification"""
 
-    def __init__(self, optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models', random_state=None):
+    def __init__(self, component_manager, optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models',
+                 random_state=None):
         """
         :param optimizer: Algorithm for hyper-parameter tuning
         :param val_size: float from (0,1), used if kfold is None
@@ -57,6 +56,7 @@ class BaseClassificationEvaluator(object):
         :param save_dir: str, path to save and load models
         :param random_state: int
         """
+        self.component_manager = component_manager
         self.optimizer = optimizer
         self.val_size = val_size
         self.kfold = kfold
@@ -168,7 +168,7 @@ class BaseClassificationEvaluator(object):
                 # Build the corresponding estimator.
                 params_num = len(config.get_dictionary().keys()) - 1
                 classifier_type = config['estimator']
-                estimator = _classifiers[classifier_type](*[None] * params_num)
+                estimator = self.component_manager.model_dict[classifier_type](*[None] * params_num)
             else:
                 estimator = self.estimator
                 classifier_type = None
@@ -182,7 +182,7 @@ class BaseClassificationEvaluator(object):
             if not hasattr(self, 'estimator'):
                 # Build the corresponding estimator.
                 params_num = len(config.keys())
-                estimator = _classifiers[classifier_type](*[None] * params_num)
+                estimator = self.component_manager.model_dict[classifier_type](*[None] * params_num)
             else:
                 estimator = self.estimator
             config['random_state'] = self.seed
@@ -253,7 +253,7 @@ class BaseClassificationEvaluator(object):
 class BaseRegressionEvaluator(object):
     """ A class to evaluate configurations for classification"""
 
-    def __init__(self, optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models', random_state=None):
+    def __init__(self, component_manager,optimizer='smac', val_size=0.33, kfold=None, save_dir='./data/save_models', random_state=None):
         """
         :param optimizer: algorithm for hyper-parameter tuning
         :param val_size: float from (0,1), used if kfold is None
@@ -261,6 +261,7 @@ class BaseRegressionEvaluator(object):
         :param save_dir: str, path to save and load models
         :param random_state: int
         """
+        self.component_manager = component_manager
         self.optimizer = optimizer
         self.val_size = val_size
         self.kfold = kfold
@@ -355,7 +356,7 @@ class BaseRegressionEvaluator(object):
                 # Build the corresponding estimator.
                 params_num = len(config.get_dictionary().keys()) - 1
                 regressor_type = config['estimator']
-                estimator = _regressors[regressor_type](*[None] * params_num)
+                estimator = self.component_manager.model_dict[regressor_type](*[None] * params_num)
             else:
                 estimator = self.estimator
                 regressor_type = None
@@ -370,7 +371,7 @@ class BaseRegressionEvaluator(object):
             if not hasattr(self, 'estimator'):
                 # Build the corresponding estimator.
                 params_num = len(config.keys())
-                estimator = _regressors[regressor_type](*[None] * params_num)
+                estimator = self.component_manager.model_dict[regressor_type](*[None] * params_num)
             else:
                 estimator = self.estimator
             config['random_state'] = self.seed
