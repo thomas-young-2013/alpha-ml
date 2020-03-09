@@ -19,6 +19,7 @@ class LDA(BaseClassificationModel):
         self.shrinkage_factor = shrinkage_factor
         self.estimator = None
         self.time_limit = None
+        self.random_state = random_state
 
     def fit(self, X, Y):
         import sklearn.multiclass

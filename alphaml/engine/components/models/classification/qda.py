@@ -18,11 +18,12 @@ class QDA(BaseClassificationModel):
         self.estimator = None
         self.tol = None
         self.time_limit = None
+        self.random_state = random_state
 
     def fit(self, X, Y):
         import sklearn.discriminant_analysis
 
-        estimator = sklearn.discriminant_analysis.\
+        estimator = sklearn.discriminant_analysis. \
             QuadraticDiscriminantAnalysis(reg_param=self.reg_param)
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:
@@ -72,8 +73,8 @@ class QDA(BaseClassificationModel):
                 'output': (PREDICTIONS,)}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None,optimizer='smac'):
-        if optimizer=='smac':
+    def get_hyperparameter_search_space(dataset_properties=None, optimizer='smac'):
+        if optimizer == 'smac':
             reg_param = UniformFloatHyperparameter('reg_param', 0.0, 1.0,
                                                    default_value=0.0)
             tol = UniformFloatHyperparameter("tol", 1e-6, 1e-2, default_value=1e-4, log=True)
@@ -82,7 +83,7 @@ class QDA(BaseClassificationModel):
             cs.add_hyperparameter(reg_param)
             cs.add_hyperparameter(tol)
             return cs
-        elif optimizer=='tpe':
+        elif optimizer == 'tpe':
             space = {'reg_param': hp.uniform('qda_reg_param', 0, 1),
                      'tol': hp.loguniform('qda_tol', np.log(1e-6), np.log(1e-2))}
 
