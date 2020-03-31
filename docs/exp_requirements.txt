@@ -5,7 +5,7 @@ atari-py==0.1.1
 autograd==1.2
 Babel==2.5.3
 backports.weakref==1.0rc1
-bleach==1.5.0
+bleach==3.1.4
 bokeh==0.13.0
 Box2D-kengz==2.3.3
 cachetools==2.1.0
